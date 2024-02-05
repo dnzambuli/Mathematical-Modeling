@@ -1,2 +1,5 @@
 *.pdf
-.Rproj.user
+*.Rproj.user
+*.Rhistory
+*.quatro
+*.RData
