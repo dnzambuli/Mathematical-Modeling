@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Nzambuli Daniel">
+<meta name="dcterms.date" content="2026-06-01">
+
+<title>SEIR Epidemic and Plotting Different Sub-populations</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="SEIR_files/libs/clipboard/clipboard.min.js"></script>
+<script src="SEIR_files/libs/quarto-html/quarto.js"></script>
+<script src="SEIR_files/libs/quarto-html/popper.min.js"></script>
+<script src="SEIR_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="SEIR_files/libs/quarto-html/anchor.min.js"></script>
+<link href="SEIR_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="SEIR_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="SEIR_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="SEIR_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="SEIR_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="SEIR_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="SEIR_files/libs/viz-1.8.2/viz.js"></script>
+<link href="SEIR_files/libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="SEIR_files/libs/grViz-binding-1.0.10/grViz.js"></script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">SEIR Epidemic and Plotting Different Sub-populations</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Nzambuli Daniel </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 1, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="task" class="level1">
+<h1>Task</h1>
+<section id="information" class="level2">
+<h2 class="anchored" data-anchor-id="information">Information</h2>
+<p><strong>Parameters of Interest:</strong> : Contact Rate (7), Transmission Probability (0.07), infectiousness Period (8), latency Period (30)</p>
+<p><strong>Disease Dynamic Parameters and Initial Values</strong>: Exposed (5000), Susceptible (9999), Infected (1), Recovered (0)</p>
+<p><strong>State Values</strong></p>
+<ul>
+<li><p>Susceptible: susceptible/Total population</p></li>
+<li><p>Exposed: exposed/Total population</p></li>
+<li><p>Infected: infected/Total population</p></li>
+<li><p>Recovered: recovered/Total population</p></li>
+<li><p>Time Period for Monitoring: 50 days</p></li>
+</ul>
+</section>
+<section id="goal" class="level2">
+<h2 class="anchored" data-anchor-id="goal">Goal</h2>
+<ol type="1">
+<li>Present the Schematic Framework to Conceptualize Compartments (Sub-populations) when Modeling Age-Groups:
+<ul>
+<li><strong>Objective:</strong> Model age-groups, considering that susceptible children experience the force of infection, while susceptible adults become infected at a constant rate.</li>
+<li><strong>Assumptions:</strong>
+<ol type="1">
+<li>Children make 13 contacts per day on average, with 7 contacts being with other children.</li>
+<li>Adults make 11 contacts per day on average, with 10 contacts being with other adults.</li>
+</ol></li>
+<li><strong>Schematic Framework:</strong> Illustrate the compartments and interactions between age-groups.</li>
+</ul></li>
+<li>Simulate the SEIR Epidemic and Plot Different Sub-populations:
+<ul>
+<li><strong>Objective:</strong> Implement the SEIR model based on the provided parameters and initial values.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Define the SEIR model equations incorporating age-group-specific contact rates.</li>
+<li>Utilize the provided initial values to simulate the epidemic over a 50-day period.</li>
+<li>Plot the trajectories of Susceptible, Exposed, Infected, and Recovered sub-populations over time.</li>
+</ol></li>
+</ul></li>
+<li>Evaluate and Discuss Changes with Vaccination:
+<ul>
+<li><strong>Objective:</strong> Assume a vaccine with 100% effectiveness against acquiring infections and analyze its impact on sub-populations.</li>
+<li><strong>Steps:</strong>
+<ol type="1">
+<li>Introduce vaccination into the model, varying vaccination percentages (10%, 20%, 30%, 50%).</li>
+<li>Simulate and observe changes in the trajectories of Susceptible, Exposed, Infected, and Recovered sub-populations.</li>
+<li>Discuss how different vaccination rates influence the epidemic dynamics</li>
+</ol></li>
+</ul></li>
+</ol>
+</section>
+<section id="reminder" class="level2" style="background-color: #f6bebo;">
+<h2 class="anchored" data-anchor-id="reminder">Reminder</h2>
+<ul>
+<li><p><strong>Susceptible</strong> – individuals who have not been exposed to the virus</p></li>
+<li><p><strong>Exposed</strong> – individuals exposed to the virus, but not yet infectious</p></li>
+<li><p><strong>Infectious</strong> – exposed individuals who go on to become infected</p></li>
+<li><p><strong>Recovered</strong> – infectious individuals who recover and become immune to the virus</p></li>
+<li><p><strong>infectiousness period</strong> – <code>time interval during which a host (individual or patient) is infectious</code>, i.e.&nbsp;capable of directly or indirectly transmitting pathogenic infectious agents or pathogens to another susceptible host.</p></li>
+</ul>
+<p><strong>Population</strong> <span class="math inline">\(N\)</span> – sum of the individuals in the four compartments.</p>
+<ol type="1">
+<li><span class="math inline">\(\beta\ -\ Beta\)</span></li>
+</ol>
+<p><strong>Transmission coefficient</strong> – The average number of <code>infectious contacts</code> an infected infectious individual makes each time period. <em>High beta</em> means that the disease has <code>more opportunity</code> to spread.</p>
+<p><span class="math display">\[
+contact\ rate * transmission\ probability
+\]</span></p>
+<ol start="2" type="1">
+<li><span class="math inline">\(\sigma\ -\ Sigma\)</span> or <span class="math inline">\(\delta\ Delta\)</span></li>
+</ol>
+<p><strong>Exposed individuals become infectious</strong> – The reciprocal of the average time it takes to become infectious. Exposion rate.</p>
+<p><span class="math display">\[\frac{1}{latency\ period}\]</span></p>
+<ol start="3" type="1">
+<li><span class="math inline">\(\gamma\ -\ Gamma\)</span></li>
+</ol>
+<p><strong>Rate of Recovery</strong> – the reciprocal of the average time it takes to recover.</p>
+<p><span class="math display">\[
+\frac{1}{infectious\ period}
+\]</span></p>
+<p>4. <span class="math inline">\(\mu\ -\ miu\)</span></p>
+<p><strong>Mortality rate</strong> – mortality rate of infectious individuals.</p>
+<p>the higher the <span class="math inline">\(\mu\)</span> the more deadly the disease is</p>
+<p><strong>Reproduction Number</strong></p>
+<p><span class="math display">\[
+Recovery\ Number\ (RO) = \frac{Beta}{Gamma(recovery\ rate)}=\frac{\beta}{\gamma}
+\]</span></p>
+</section>
+</section>
+<section id="working" class="level1">
+<h1>Working</h1>
+<section id="packages" class="level2">
+<h2 class="anchored" data-anchor-id="packages">Packages</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(deSolve)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.4.4     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DiagrammeR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="relationship-between-different-states" class="level3">
+<h3 class="anchored" data-anchor-id="relationship-between-different-states">Relationship between different states</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grViz</span>(<span class="st">"digraph flowchart {</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">      graph [layout = dot,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">       rankdir = LR]</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">      node [fontname = Helvetica, shape = rectangle,]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">      tab1 [label = '@@1']</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">      tab2 [label = '@@2']</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="st">      tab3 [label = '@@3'] </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="st">      tab4 [label = '@@4']</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="st">      # edge definitions with the node IDs</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="st">      tab1 -&gt; tab2;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="st">      tab2 -&gt; tab3;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="st">      tab3 -&gt; tab4;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="st">      }</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="st">      [1]: 'Susceptible'</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="st">      [2]: 'Exposed'</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="st">      [3]: 'Infected'</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="st">      [4]: 'Recovered'</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="st">      "</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="grViz html-widget html-fill-item" id="htmlwidget-a3a2d6b993ef4c2a0e82" style="width:100%;height:325px;"></div>
+<script type="application/json" data-for="htmlwidget-a3a2d6b993ef4c2a0e82">{"x":{"diagram":"digraph flowchart {\n      graph [layout = dot,\n       rankdir = LR]\n      node [fontname = Helvetica, shape = rectangle,]\n      tab1 [label = \"Susceptible\"]\n      tab2 [label = \"Exposed\"]\n      tab3 [label = \"Infected\"] \n      tab4 [label = \"Recovered\"]\n      # edge definitions with the node IDs\n      tab1 -> tab2;\n      tab2 -> tab3;\n      tab3 -> tab4;\n      }","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+</section>
+<section id="parameters" class="level2">
+<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
+<blockquote class="blockquote">
+<p>Disease parameters</p>
+<ul>
+<li><p>Contact Rate (7)</p></li>
+<li><p>Transmission Probability (0.07)</p></li>
+<li><p>Infectiousness Period (8)</p></li>
+<li><p>Latency Period (30)</p></li>
+</ul>
+<p>Population parameters</p>
+<ul>
+<li><p>Exposed (5000)</p></li>
+<li><p>Susceptible (9999)</p></li>
+<li><p>Infected (1)</p></li>
+<li><p>Recovered (0)</p></li>
+</ul>
+</blockquote>
+<div style="background-color: #d3d4d4;">
+<ol type="1">
+<li>Children make 13 contacts per day on average, with 7 contacts being with other children.</li>
+<li>Adults make 11 contacts per day on average, with 10 contacts being with other adults.</li>
+<li>Children are 30% of the population.</li>
+</ol>
+</div>
+</section>
+</section>
+<section id="modelling-10-vaccinated-population" class="level1">
+<h1>Modelling 10% vaccinated population</h1>
+<section id="population-param" class="level2">
+<h2 class="anchored" data-anchor-id="population-param">Population Param</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Exposed <span class="ot">=</span> <span class="dv">5000</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Susceptible <span class="ot">=</span> <span class="dv">9999</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Infected <span class="ot">=</span> <span class="dv">1</span> <span class="co"># There is only one infected person; can be a child or adult</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>Recovered <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>Total_pop <span class="ot">=</span> Exposed <span class="sc">+</span> Susceptible <span class="sc">+</span> Infected <span class="sc">+</span> Recovered</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>Total_pop</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 15000</code></pre>
+</div>
+</div>
+<section id="distinctions" class="level3">
+<h3 class="anchored" data-anchor-id="distinctions">Distinctions</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># population separation</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>child.prop <span class="ot">=</span> <span class="fl">0.3</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>adult.prop <span class="ot">=</span> <span class="fl">0.7</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Susceptible Individuals</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>vaccinated_prop <span class="ot">=</span> <span class="fl">0.1</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>initial_susceptible <span class="ot">=</span> (<span class="dv">1</span> <span class="sc">-</span> vaccinated_prop) <span class="sc">*</span> Total_pop</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>initial_recovered <span class="ot">=</span> vaccinated_prop <span class="sc">*</span> Total_pop</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>infectious_period <span class="ot">=</span> <span class="dv">8</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>rate_of_recovery <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">8</span> <span class="co"># gamma</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>contact_rate <span class="ot">=</span> <span class="dv">7</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>infectious_prob <span class="ot">=</span> <span class="fl">0.07</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">=</span> <span class="fl">0.07</span> <span class="sc">*</span> <span class="dv">7</span> <span class="co"># contact * infectious probability</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>reproduction_no <span class="ot">=</span> beta<span class="sc">/</span> rate_of_recovery</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># follow up period</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>follow.up <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>initial_exposed <span class="ot">=</span> <span class="dv">5000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="children-vs-adults" class="level3">
+<h3 class="anchored" data-anchor-id="children-vs-adults">Children vs Adults</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># susceptible</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>susc.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_susceptible</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>susc.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_susceptible</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># exposed </span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>exp.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_exposed</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>exp.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_exposed</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># recovered </span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>recv.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_recovered</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>recv.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_recovered</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>Infected<span class="fl">.2</span> <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>initial_state <span class="ot">=</span> <span class="fu">c</span>(susc.adult, susc.child,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>                  exp.adult, exp.child,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                  Infected, Infected<span class="fl">.2</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>                  recv.adult, recv.child)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="exposion-rate-and-effective-contact-rates" class="level2">
+<h2 class="anchored" data-anchor-id="exposion-rate-and-effective-contact-rates">Exposion Rate and Effective Contact Rates</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exposion rate</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>latency.period <span class="ot">=</span> <span class="dv">30</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span> latency.period</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># effective contact rate</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">7</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">6</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>child.contact <span class="ot">=</span> <span class="dv">13</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>adult.contact <span class="ot">=</span> <span class="dv">11</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># The rho child and adult</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>c2c <span class="ot">=</span> child.<span class="fl">2.</span>child.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>c2a <span class="ot">=</span> child.<span class="fl">2.</span>adult.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># rho adult</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>a2a <span class="ot">=</span> adult.<span class="fl">2.</span>adult.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>a2c <span class="ot">=</span> adult.<span class="fl">2.</span>child.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># parameters </span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>parameters <span class="ot">=</span> <span class="fu">c</span>(a2a, a2c, c2c, c2a,</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>               <span class="at">gamma =</span> rate_of_recovery,</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>               <span class="at">delta =</span> delta)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># time</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>time <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">100</span>, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="seir-model-function" class="level2">
+<h2 class="anchored" data-anchor-id="seir-model-function">SEIR model function</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>seir_func <span class="ot">=</span> <span class="cf">function</span>(time, state, parameters){</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># susceptible 1 adult 2 child</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  s1 <span class="ot">=</span> state[<span class="dv">1</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  s2 <span class="ot">=</span> state[<span class="dv">2</span>]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># exposed </span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  E1 <span class="ot">=</span> state[<span class="dv">3</span>]</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  E2 <span class="ot">=</span> state[<span class="dv">4</span>]</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># infected</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  I <span class="ot">=</span> state[<span class="dv">5</span>]</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  I2 <span class="ot">=</span> state[<span class="dv">6</span>]</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># recovered</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  R1 <span class="ot">=</span> state[<span class="dv">7</span>]</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  R2 <span class="ot">=</span> state[<span class="dv">8</span>]</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">as.list</span>(parameters),{</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># adul</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    n1 <span class="ot">=</span> s1 <span class="sc">+</span> E1 <span class="sc">+</span> I <span class="sc">+</span> R1</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    n2 <span class="ot">=</span> s2 <span class="sc">+</span> E2 <span class="sc">+</span> I2 <span class="sc">+</span> R1</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># adult</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    dS1 <span class="ot">=</span> <span class="sc">-</span>(a2a <span class="sc">+</span> a2c) <span class="sc">*</span> s1 <span class="sc">*</span>(I <span class="sc">+</span> I2)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    dE1 <span class="ot">=</span> ((a2a<span class="sc">+</span> a2c) <span class="sc">*</span> s1 <span class="sc">*</span> (I <span class="sc">+</span> I2)) <span class="sc">-</span> (delta <span class="sc">*</span> E1)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    dI1 <span class="ot">=</span> (delta <span class="sc">*</span> E1) <span class="sc">-</span> (gamma <span class="sc">*</span> I)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    dR1 <span class="ot">=</span> (gamma <span class="sc">*</span> I)</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># children</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    dS2 <span class="ot">=</span> <span class="sc">-</span>(c2c <span class="sc">+</span> c2a) <span class="sc">*</span> s2 <span class="sc">*</span>(I <span class="sc">+</span> I2)</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    dE2 <span class="ot">=</span> ((c2c<span class="sc">+</span> c2a) <span class="sc">*</span> s2 <span class="sc">*</span> (I <span class="sc">+</span> I2)) <span class="sc">-</span> (delta <span class="sc">*</span> E2)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    dI2 <span class="ot">=</span> (delta <span class="sc">*</span> E2) <span class="sc">-</span> (gamma <span class="sc">*</span> I)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    dR2 <span class="ot">=</span> (gamma <span class="sc">*</span> I)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">=</span> <span class="fu">c</span>(dS1, dS2,</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>               dE1, dE2,</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>               dI1, dI2,</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>               dR1, dR2)</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(result))</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="potential-output" class="level3">
+<h3 class="anchored" data-anchor-id="potential-output">Potential Output</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(deSolve)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>seir_out <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">lsoda</span>(initial_state,time,seir_func,parameters, <span class="at">maxsteps =</span> <span class="dv">10000</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>seir_out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>    time             1             2          3         4         5           6
+1      0  9.450000e+03  4.050000e+03  3500.0000 1500.0000    1.0000     0.00000
+2      1  2.910330e-08  1.247284e-08 12560.1178 5382.9076  369.0291   145.23930
+3      2  6.230103e-08  2.670044e-08 12148.3482 5206.4349  712.6060   253.51926
+4      3 -1.345674e-07 -5.767173e-08 11750.0780 5035.7477 1003.1259   316.45620
+5      4  4.324584e-08  1.853392e-08 11364.8646 4870.6563 1247.2394   340.44777
+6      5  4.213845e-09  1.805932e-09 10992.2801 4710.9772 1450.8013   331.10415
+7      6 -2.035098e-08 -8.721842e-09 10631.9103 4556.5330 1618.9658   293.34314
+8      7 -1.622581e-08 -6.953913e-09 10283.3548 4407.1521 1756.2688   231.47151
+9      8  1.710843e-07  7.332177e-08  9946.2263 4262.6684 1866.7003   149.25821
+10     9  4.922908e-10  2.109814e-10  9620.1503 4122.9215 1953.7700    49.99873
+11    10 -7.362251e-11 -3.155245e-11  9304.7642 3987.7561 2020.5637   -63.42817
+12    11  3.394154e-10  1.454635e-10  8999.7178 3857.0219 2069.7929  -188.51120
+13    12  7.587797e-11  3.251907e-11  8704.6719 3730.5737 2103.8400  -323.06172
+14    13  1.383351e-09  5.928635e-10  8419.2988 3608.2709 2124.7971  -465.17496
+15    14 -9.425693e-09 -4.039575e-09  8143.2814 3489.9777 2134.4999  -613.19646
+16    15  1.434345e-09  6.147182e-10  7876.3129 3375.5627 2134.5593  -765.69053
+17    16  1.356413e-08  5.813190e-09  7618.0966 3264.8986 2126.3874  -921.41455
+18    17 -5.376194e-09 -2.304079e-09  7368.3457 3157.8625 2111.2208 -1079.29598
+19    18 -3.402399e-09 -1.458169e-09  7126.7826 3054.3354 2090.1419 -1238.41089
+20    19  3.012557e-08  1.291093e-08  6893.1389 2954.2024 2064.0979 -1397.96555
+21    20  1.379198e-08  5.910838e-09  6667.1549 2857.3521 2033.9165 -1557.28073
+22    21 -2.341144e-07 -1.003346e-07  6448.5796 2763.6770 2000.3196 -1715.77773
+23    22 -9.057204e-07 -3.881652e-07  6237.1700 2673.0729 1963.9370 -1872.96590
+24    23 -2.322613e-06 -9.954036e-07  6032.6912 2585.4391 1925.3164 -2028.43143
+25    24 -6.480134e-06 -2.777195e-06  5834.9161 2500.6783 1884.9346 -2181.82766
+26    25 -8.843184e-05 -3.789929e-05  4989.5709 2138.3880 2488.1223 -2061.69491
+27    26  2.029184e-09  8.696487e-10  4825.9928 2068.2831 2349.4711 -2293.81922
+28    27  8.667248e-08  3.714528e-08  4667.7780 2000.4768 2222.0765 -2511.62228
+29    28 -3.388084e-07 -1.452034e-07  4514.7501 1934.8934 2104.7765 -2716.36675
+30    29  3.288780e-07  1.409475e-07  4366.7390 1871.4600 1996.5453 -2909.17570
+31    30  4.920825e-08  2.108921e-08  4223.5803 1810.1063 1896.4718 -3091.05421
+32    31  2.102124e-08  9.009088e-09  4085.1150 1750.7640 1803.7471 -3262.90189
+33    32 -2.133865e-07 -9.145119e-08  3951.1890 1693.3671 1717.6525 -3425.52564
+34    33  2.323853e-07  9.959351e-08  3821.6537 1637.8520 1637.5483 -3579.64997
+35    34 -2.484270e-08 -1.064685e-08  3696.3651 1584.1569 1562.8662 -3725.92551
+36    35  4.657691e-09  1.996149e-09  3575.1840 1532.2221 1493.0998 -3864.93832
+37    36  1.778698e-08  7.622977e-09  3457.9755 1481.9899 1427.7967 -3997.21765
+38    37 -1.220355e-07 -5.230085e-08  3344.6095 1433.4044 1366.5553 -4123.23959
+39    38 -2.321697e-09 -9.950100e-10  3234.9599 1386.4117 1309.0174 -4243.43445
+40    39 -2.031250e-09 -8.705316e-10  3128.9051 1340.9597 1254.8628 -4358.19172
+41    40 -1.040862e-08 -4.460822e-09  3026.3275 1296.9978 1203.8051 -4467.86522
+42    41  7.385329e-09  3.165131e-09  2927.1128 1254.4772 1155.5867 -4572.77778
+43    42  1.213975e-09  5.202733e-10  2831.1507 1213.3506 1109.9779 -4673.22196
+44    43  2.218719e-11  9.508766e-12  2738.3347 1173.5723 1066.7722 -4769.46543
+45    44 -1.581788e-10 -6.779072e-11  2648.5615 1135.0981 1025.7836 -4861.75295
+46    45 -6.566951e-10 -2.814399e-10  2561.7313 1097.8851  986.8444 -4950.30947
+47    46  4.358402e-10  1.867881e-10  2477.7476 1061.8921  949.8054 -5035.33911
+48    47 -7.403466e-10 -3.172904e-10  2396.5173 1027.0791  914.5318 -5117.02997
+49    48  9.667934e-10  4.143387e-10  2317.9501  993.4074  880.9008 -5195.55645
+50    49 -7.599349e-10 -3.256853e-10  2241.9587  960.8397  848.8012 -5271.07974
+51    50 -2.704594e-09 -1.159108e-09  2168.4585  929.3396  818.1323 -5343.74876
+52    51  3.262443e-08  1.398185e-08  2097.3680  898.8722  788.8027 -5413.70154
+53    52 -8.592920e-08 -3.682668e-08  2028.6081  869.4037  760.7293 -5481.06631
+54    53  3.450556e-07  1.478805e-07  1962.1024  840.9012  733.8364 -5545.96250
+55    54 -2.130697e-07 -9.131528e-08  1897.7770  813.3332  708.0547 -5608.50150
+56    55  5.784756e-12  2.479174e-12  1835.5599  786.6687  683.3204 -5668.78844
+57    56 -4.122650e-12 -1.766841e-12  1775.3831  760.8787  659.5762 -5726.91930
+58    57  3.451593e-12  1.479246e-12  1717.1793  735.9342  636.7684 -5782.98653
+59    58  3.381605e-15  1.449251e-15  1660.8835  711.8074  614.8474 -5837.07651
+60    59  6.830449e-14  2.927321e-14  1606.4334  688.4716  593.7679 -5889.27038
+61    60 -2.200679e-13 -9.431432e-14  1553.7683  665.9009  573.4877 -5939.64481
+62    61 -1.195895e-13 -5.125239e-14  1502.8297  644.0700  553.9679 -5988.27242
+63    62  3.005309e-14  1.287983e-14  1453.5610  622.9548  535.1724 -6035.22147
+64    63 -8.136560e-14 -3.487079e-14  1405.9075  602.5319  517.0677 -6080.55671
+65    64  8.603237e-14  3.687083e-14  1359.8164  582.7786  499.6224 -6124.33983
+66    65 -1.187666e-13 -5.089970e-14  1315.2363  563.6728  482.8070 -6166.62952
+67    66  1.691161e-13  7.247797e-14  1272.1177  545.1934  466.5941 -6207.48159
+68    67 -2.580602e-13 -1.105967e-13  1230.4127  527.3199  450.9580 -6246.94919
+69    68  4.282184e-13  1.835212e-13  1190.0750  510.0323  435.8743 -6285.08301
+70    69 -8.417839e-13 -3.607627e-13  1151.0597  493.3114  421.3203 -6321.93145
+71    70  4.502474e-13  1.929622e-13  1113.3234  477.1387  407.2745 -6357.54078
+72    71 -5.946555e-13 -2.548511e-13  1076.8244  461.4963  393.7166 -6391.95526
+73    72  1.035317e-12  4.437052e-13  1041.5219  446.3666  380.6274 -6425.21731
+74    73 -1.254011e-12 -5.374306e-13  1007.3767  431.7330  367.9887 -6457.36758
+75    74  1.886640e-12  8.085560e-13   974.3510  417.5791  355.7831 -6488.44500
+76    75 -3.027565e-12 -1.297521e-12   942.4080  403.8892  343.9943 -6518.48696
+77    76  5.028833e-12  2.155203e-12   911.5121  390.6482  332.6067 -6547.52936
+78    77 -8.637406e-12 -3.701726e-12   881.6292  377.8412  321.6053 -6575.60668
+79    78  1.547471e-11  6.631986e-12   852.7260  365.4541  310.9760 -6602.75210
+80    79 -3.105335e-11 -1.330851e-11   824.7703  353.4731  300.7053 -6628.99750
+81    80  1.093977e-11  4.688449e-12   797.7311  341.8848  290.7802 -6654.37358
+82    81 -9.263968e-12 -3.970252e-12   771.5784  330.6765  281.1883 -6678.90988
+83    82  1.094228e-11  4.689524e-12   746.2830  319.8357  271.9178 -6702.63485
+84    83 -1.241457e-11 -5.320501e-12   721.8170  309.3502  262.9573 -6725.57591
+85    84  1.306504e-11  5.599274e-12   698.1530  299.2085  254.2960 -6747.75948
+86    85 -1.563626e-11 -6.701220e-12   675.2648  289.3993  245.9234 -6769.21102
+87    86  2.087366e-11  8.945811e-12   653.1270  279.9116  237.8295 -6789.95509
+88    87 -2.822130e-11 -1.209478e-11   631.7149  270.7350  230.0047 -6810.01539
+89    88  3.926036e-11  1.682578e-11   611.0049  261.8593  222.4397 -6829.41475
+90    89 -5.718659e-11 -2.450841e-11   590.9737  253.2745  215.1255 -6848.17524
+91    90  8.617407e-11  3.693156e-11   571.5993  244.9712  208.0537 -6866.31814
+92    91 -1.333887e-10 -5.716630e-11   552.8601  236.9401  201.2160 -6883.86399
+93    92  2.120876e-10  9.089424e-11   534.7352  229.1723  194.6045 -6900.83263
+94    93 -3.458616e-10 -1.482256e-10   517.2045  221.6591  188.2114 -6917.24323
+95    94  5.770252e-10  2.472953e-10   500.2485  214.3923  182.0295 -6933.11428
+96    95 -9.832344e-10 -4.213840e-10   483.8484  207.3636  176.0516 -6948.46364
+97    96  1.708876e-09  7.323716e-10   467.9859  200.5655  170.2709 -6963.30859
+98    97 -3.025405e-09 -1.296595e-09   452.6435  193.9901  164.6808 -6977.66581
+99    98  5.265242e-09  2.256521e-09   437.8041  187.6304  159.2749 -6991.55139
+100   99 -8.918499e-09 -3.822194e-09   423.4512  181.4791  154.0470 -7004.98093
+101  100  2.707201e-09  1.160223e-09   409.5688  175.5295  148.9913 -7017.96947
+            7          8
+1    1050.000   450.0000
+2    1071.853   471.8531
+3    1140.046   540.0458
+4    1247.796   647.7961
+5    1388.896   788.8960
+6    1557.919   957.9187
+7    1750.124  1150.1239
+8    1961.376  1361.3764
+9    2188.073  1588.0734
+10   2427.080  1827.0797
+11   2675.672  2075.6721
+12   2931.489  2331.4893
+13   3192.488  2592.4880
+14   3456.904  2856.9040
+15   3723.219  3123.2187
+16   3990.128  3390.1279
+17   4256.516  3656.5160
+18   4521.434  3921.4335
+19   4784.075  4184.0755
+20   5043.763  4443.7632
+21   5299.929  4699.9286
+22   5552.101  4952.1008
+23   5799.893  5199.8930
+24   6042.992  5442.9923
+25   6281.149  5681.1493
+26   6523.307  5923.3069
+27   6825.536  6225.5361
+28   7111.145  6511.1455
+29   7381.473  6781.4734
+30   7637.716  7037.7157
+31   7880.948  7280.9479
+32   8112.138  7512.1379
+33   8332.159  7732.1585
+34   8541.798  7941.7980
+35   8741.769  8141.7686
+36   8932.716  8332.7162
+37   9115.228  8515.2278
+38   9289.835  8689.8352
+39   9457.023  8857.0227
+40   9617.232  9017.2320
+41   9770.867  9170.8674
+42   9918.301  9318.3006
+43  10059.871  9459.8714
+44  10195.893  9595.8931
+45  10326.655  9726.6549
+46  10452.424  9852.4244
+47  10573.447  9973.4470
+48  10689.951 10089.9509
+49  10802.149 10202.1490
+50  10910.240 10310.2401
+51  11014.409 10414.4092
+52  11114.829 10514.8293
+53  11211.663 10611.6626
+54  11305.061 10705.0613
+55  11395.168 10795.1683
+56  11482.120 10882.1197
+57  11566.041 10966.0406
+58  11647.052 11047.0524
+59  11725.269 11125.2691
+60  11800.799 11200.7988
+61  11873.744 11273.7439
+62  11944.202 11344.2024
+63  12012.267 11412.2666
+64  12078.025 11478.0248
+65  12141.561 11541.5612
+66  12202.957 11602.9567
+67  12262.288 11662.2882
+68  12319.629 11719.6293
+69  12375.051 11775.0508
+70  12428.620 11828.6200
+71  12480.402 11880.4020
+72  12530.459 11930.4590
+73  12578.851 11978.8507
+74  12625.635 12025.6346
+75  12670.866 12070.8659
+76  12714.598 12114.5977
+77  12756.881 12156.8812
+78  12797.765 12197.7655
+79  12837.298 12237.2980
+80  12875.524 12275.5244
+81  12912.489 12312.4887
+82  12948.233 12348.2334
+83  12982.799 12382.7992
+84  13016.226 12416.2257
+85  13048.551 12448.5510
+86  13079.812 12479.8117
+87  13110.043 12510.0435
+88  13139.280 12539.2803
+89  13167.555 12567.5555
+90  13194.901 12594.9007
+91  13221.347 12621.3469
+92  13246.924 12646.9239
+93  13271.660 12671.6604
+94  13295.584 12695.5841
+95  13318.722 12718.7220
+96  13341.100 12741.1000
+97  13362.743 12762.7431
+98  13383.676 12783.6757
+99  13403.921 12803.9210
+100 13423.502 12823.5018
+101 13442.440 12842.4399</code></pre>
+</div>
+</div>
+</section>
+<section id="label-the-colums" class="level3">
+<h3 class="anchored" data-anchor-id="label-the-colums">Label the colums</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(seir_out) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"time"</span>,<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>, </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>, </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plot-for-10-intervention" class="level3">
+<h3 class="anchored" data-anchor-id="plot-for-10-intervention">plot for 10% intervention</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using ggplot</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>seir_long <span class="ot">=</span> seir_out <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>,<span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>, </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>), </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">names_to =</span> <span class="st">"state"</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">values_to =</span> <span class="st">"value"</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> seir_long,<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> value, <span class="at">colour =</span> state, <span class="at">group =</span> state)) <span class="sc">+</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">colour =</span> <span class="st">"Compartment"</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"SEIR at 10% intervention"</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">x=</span><span class="st">"Time (days)"</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of people"</span>)<span class="sc">+</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="SEIR_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
+</section>
+</section>
+<section id="modelling-intervention-at-20" class="level1">
+<h1>Modelling Intervention at 20%</h1>
+<section id="set-up" class="level3">
+<h3 class="anchored" data-anchor-id="set-up">set up</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># population separation </span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Susceptible Individuals </span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>vaccinated_prop <span class="ot">=</span> <span class="fl">0.2</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>initial_susceptible <span class="ot">=</span> (<span class="dv">1</span> <span class="sc">-</span> vaccinated_prop) <span class="sc">*</span> Total_pop</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>initial_recovered <span class="ot">=</span> vaccinated_prop <span class="sc">*</span> Total_pop </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>infectious_period <span class="ot">=</span> <span class="dv">8</span> </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>rate_of_recovery <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">8</span> <span class="co"># gamma </span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>contact_rate <span class="ot">=</span> <span class="dv">7</span> </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>infectious_prob <span class="ot">=</span> <span class="fl">0.07</span> </span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">=</span> <span class="fl">0.07</span> <span class="sc">*</span> <span class="dv">7</span> <span class="co"># contact * infectious probability </span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>reproduction_no <span class="ot">=</span> beta<span class="sc">/</span> rate_of_recovery  </span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># follow up period </span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>follow.up <span class="ot">=</span> <span class="dv">100</span>  </span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>initial_exposed <span class="ot">=</span> <span class="dv">5000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="children-vs-adults-1" class="level3">
+<h3 class="anchored" data-anchor-id="children-vs-adults-1">Children vs Adults</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># susceptible </span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>susc.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_susceptible </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>susc.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_susceptible  </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># exposed  </span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>exp.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_exposed </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>exp.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_exposed  </span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># recovered  </span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>recv.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_recovered </span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>recv.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_recovered  </span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>Infected <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>Infected<span class="fl">.2</span> <span class="ot">=</span> <span class="dv">1</span>  </span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>initial_state <span class="ot">=</span> <span class="fu">c</span>(susc.adult, susc.child,exp.adult, exp.child,Infected, Infected<span class="fl">.2</span>, recv.adult, recv.child) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="exposion-rate-and-effective-contact-rates-1" class="level2">
+<h2 class="anchored" data-anchor-id="exposion-rate-and-effective-contact-rates-1">Exposion Rate and Effective Contact Rates</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exposion rate </span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>latency.period <span class="ot">=</span> <span class="dv">30</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span> latency.period  </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># effective contact rate </span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">7</span> </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">6</span> </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>child.contact <span class="ot">=</span> <span class="dv">13</span>  </span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">10</span> </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">1</span> </span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>adult.contact <span class="ot">=</span> <span class="dv">11</span>  </span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co"># The rho child and adult </span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>c2c <span class="ot">=</span> child.<span class="fl">2.</span>child.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta </span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>c2a <span class="ot">=</span> child.<span class="fl">2.</span>adult.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta   </span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co"># rho adult </span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>a2a <span class="ot">=</span> adult.<span class="fl">2.</span>adult.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta </span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>a2c <span class="ot">=</span> adult.<span class="fl">2.</span>child.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta  </span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="co"># parameters  </span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>parameters <span class="ot">=</span> <span class="fu">c</span>(a2a, a2c, c2c, c2a,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>               <span class="at">gamma =</span> rate_of_recovery,</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>               <span class="at">delta =</span> delta)  </span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co"># time </span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>time <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">1</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="seir-model-function-1" class="level2">
+<h2 class="anchored" data-anchor-id="seir-model-function-1">SEIR model function</h2>
+<section id="potential-output-1" class="level3">
+<h3 class="anchored" data-anchor-id="potential-output-1">Potential Output</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>seir_out <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">lsoda</span>(initial_state,time,seir_func,parameters, <span class="at">maxsteps =</span> <span class="dv">10000</span>)) </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>seir_out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   time             1             2         3         4         5           6
+1     0  8.400000e+03  3.600000e+03  3500.000 1500.0000    0.0000     1.00000
+2     1  5.668304e-08  2.429273e-08 11541.091 4946.1818  338.8604   134.76947
+3     2 -3.265734e-07 -1.399600e-07 11162.729 4784.0267  654.5891   234.29129
+4     3  1.297533e-08  5.560854e-09 10796.771 4627.1876  921.5623   292.14580
+5     4  1.039086e-11  4.453170e-12 10442.811 4475.4904 1145.8912   314.21172
+6     5 -3.780083e-10 -1.620038e-10 10100.455 4328.7663 1332.9572   305.64562
+7     6  1.092137e-09  4.680590e-10  9769.322 4186.8525 1487.4951   270.96512
+8     7 -7.812314e-10 -3.348137e-10  9449.046 4049.5911 1613.6733   214.12818
+9     8 -1.539927e-07 -6.599691e-08  9139.269 3916.8298 1715.1583   138.59796
+10    9  7.129601e-15  3.055538e-15  8839.649 3788.4208 1795.1751    47.40285
+11   10 -7.839968e-15 -3.359988e-15  8549.850 3664.2216 1856.5593   -56.81187
+12   11 -1.997965e-14 -8.562709e-15  8269.553 3544.0941 1901.8030  -171.73822
+13   12 -6.135383e-14 -2.629451e-14  7998.445 3427.9049 1933.0953  -295.36489
+14   13  1.636081e-14  7.011776e-15  7736.225 3315.5248 1952.3585  -425.94177
+15   14  4.171213e-13  1.787663e-13  7482.601 3206.8290 1961.2799  -561.94815
+16   15 -6.092179e-13 -2.610935e-13  7237.292 3101.6966 1961.3398  -702.06476
+17   16 -1.857209e-14 -7.959469e-15  7000.025 3000.0109 1953.8354  -845.15008
+18   17  6.389004e-13  2.738146e-13  6770.537 2901.6588 1939.9031  -990.21847
+19   18 -1.118303e-12 -4.792728e-13  6548.573 2806.5312 1920.5378 -1136.42065
+20   19 -2.329174e-12 -9.982176e-13  6333.885 2714.5221 1896.6100 -1283.02717
+21   20  7.051519e-12  3.022080e-12  6126.236 2625.5295 1868.8800 -1429.41395
+22   21  3.488879e-11  1.495234e-11  5925.394 2539.4544 1838.0115 -1575.04933
+23   22  7.158020e-11  3.067724e-11  5731.136 2456.2012 1804.5827 -1719.48239
+24   23  8.110341e-11  3.475861e-11  5543.247 2375.6773 1769.0974 -1862.33281
+25   24 -9.553554e-12 -4.094381e-12  5361.518 2297.7934 1731.9935 -2003.28201
+26   25 -4.493789e-10 -1.925910e-10  5185.746 2222.4627 1693.6509 -2142.06542
+27   26 -2.808866e-09 -1.203800e-09  5015.737 2149.6017 1654.3987 -2278.46559
+28   27 -1.907405e-08 -8.174594e-09  4851.302 2079.1294 1614.5214 -2412.30606
+29   28 -1.508490e-07 -6.464958e-08  4692.257 2010.9675 1574.2640 -2543.44610
+30   29 -1.350394e-06 -5.787405e-07  4538.427 1945.0401 1533.8373 -2671.77594
+31   30 -1.335648e-09 -5.724211e-10  4389.638 1881.2735 1493.4232 -2797.21221
+32   31 -3.626525e-10 -1.554226e-10  4245.728 1819.5976 1453.1734 -2919.69654
+33   32  2.760613e-10  1.183121e-10  4106.537 1759.9443 1413.2182 -3039.18931
+34   33  6.175486e-09  2.646639e-09  3971.909 1702.2466 1373.6702 -3155.66772
+35   34  8.762350e-08  3.755296e-08  3841.694 1646.4404 1334.6217 -3269.12448
+36   35 -1.806229e-08 -7.740989e-09  3715.749 1592.4637 1296.1497 -3379.56531
+37   36 -4.807305e-08 -2.060275e-08  3593.932 1540.2567 1258.3184 -3487.00602
+38   37  9.933580e-10  4.257250e-10  3476.109 1489.7612 1221.1796 -3591.47216
+39   38  2.936691e-07  1.258583e-07  3362.149 1440.9211 1184.7751 -3692.99673
+40   39 -7.643360e-08 -3.275729e-08  3251.925 1393.6823 1149.1375 -3791.61951
+41   40 -6.719231e-08 -2.879673e-08  3145.315 1347.9920 1114.2919 -3887.38545
+42   41  2.982996e-08  1.278428e-08  3042.199 1303.7997 1080.2564 -3980.34401
+43   42 -7.536856e-08 -3.230084e-08  2942.464 1261.0562 1047.0436 -4070.54821
+44   43 -5.496213e-08 -2.355522e-08  2845.999 1219.7139 1014.6609 -4158.05387
+45   44  2.578995e-08  1.105284e-08  2752.696 1179.7271  983.1115 -4242.91911
+46   45 -2.119179e-08 -9.082204e-09  2662.453 1141.0512  952.3948 -4325.20368
+47   46 -9.841868e-09 -4.217946e-09  2575.168 1103.6432  922.5072 -4404.96846
+48   47  1.079888e-08  4.628094e-09  2490.744 1067.4617  893.4425 -4482.27517
+49   48 -1.558655e-08 -6.679956e-09  2409.088 1032.4664  865.1923 -4557.18588
+50   49  4.014498e-08  1.720500e-08  2330.109  998.6181  837.7463 -4629.76291
+51   50 -6.107897e-08 -2.617672e-08  2253.719  965.8794  811.0923 -4700.06845
+           7         8
+1   2100.000  900.0000
+2   2120.049  920.0488
+3   2182.682  982.6821
+4   2281.667 1081.6666
+5   2411.298 1211.2979
+6   2566.588 1366.5880
+7   2743.182 1543.1824
+8   2937.281 1737.2807
+9   3145.572 1945.5723
+10  3365.176 2165.1764
+11  3593.590 2393.5903
+12  3828.644 2628.6441
+13  4068.460 2868.4600
+14  4311.417 3111.4170
+15  4556.119 3356.1192
+16  4801.368 3601.3681
+17  5046.139 3846.1392
+18  5289.560 4089.5596
+19  5530.889 4330.8895
+20  5769.505 4569.5050
+21  6004.884 4804.8845
+22  6236.595 5036.5949
+23  6464.281 5264.2812
+24  6687.655 5487.6555
+25  6906.489 5706.4886
+26  7120.603 5920.6027
+27  7329.864 6129.8638
+28  7534.177 6334.1766
+29  7733.479 6533.4786
+30  7927.736 6727.7358
+31  8116.939 6916.9388
+32  8301.099 7101.0990
+33  8480.245 7280.2450
+34  8654.421 7454.4211
+35  8823.684 7623.6841
+36  8988.102 7788.1016
+37  9147.749 7947.7493
+38  9302.711 8102.7109
+39  9453.076 8253.0756
+40  9598.937 8398.9373
+41  9740.393 8540.3934
+42  9877.544 8677.5443
+43 10010.492 8810.4920
+44 10139.340 8939.3399
+45 10264.192 9064.1921
+46 10385.153 9185.1525
+47 10502.325 9302.3252
+48 10615.813 9415.8134
+49 10725.720 9525.7195
+50 10832.145 9632.1448
+51 10935.189 9735.1890</code></pre>
+</div>
+</div>
+</section>
+<section id="label-the-colums-1" class="level3">
+<h3 class="anchored" data-anchor-id="label-the-colums-1">Label the colums</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(seir_out) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"time"</span>,<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>, <span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>,<span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>, <span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plot-for-20-intervention" class="level3">
+<h3 class="anchored" data-anchor-id="plot-for-20-intervention">plot for 20% intervention</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>seir_long <span class="ot">=</span> seir_out <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>,<span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>,<span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>,<span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>),<span class="at">names_to =</span> <span class="st">"state"</span>,<span class="at">values_to =</span> <span class="st">"value"</span> )  </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot </span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> seir_long,<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> value, <span class="at">colour =</span> state, <span class="at">group =</span> state)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span><span class="fu">labs</span>(<span class="at">colour =</span> <span class="st">"Compartment"</span>,<span class="at">title =</span> <span class="st">"SEIR at 20% intervention"</span>, <span class="at">x=</span><span class="st">"Time (days)"</span>,<span class="at">y =</span> <span class="st">"Number of people"</span>)<span class="sc">+</span><span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="SEIR_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="section-1" class="level2">
+<h2 class="anchored" data-anchor-id="section-1"></h2>
+</section>
+</section>
+<section id="modelling-30-intervention" class="level1">
+<h1>Modelling 30 % intervention</h1>
+<section id="set-up-1" class="level3">
+<h3 class="anchored" data-anchor-id="set-up-1">set up</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># population separation  </span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Susceptible Individuals  </span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>vaccinated_prop <span class="ot">=</span> <span class="fl">0.3</span> </span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>initial_susceptible <span class="ot">=</span> (<span class="dv">1</span> <span class="sc">-</span> vaccinated_prop) <span class="sc">*</span> Total_pop </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>initial_recovered <span class="ot">=</span> vaccinated_prop <span class="sc">*</span> Total_pop  </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>infectious_period <span class="ot">=</span> <span class="dv">8</span>  </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>rate_of_recovery <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">8</span> <span class="co"># gamma  </span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>contact_rate <span class="ot">=</span> <span class="dv">7</span>  </span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>infectious_prob <span class="ot">=</span> <span class="fl">0.07</span>  </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">=</span> <span class="fl">0.07</span> <span class="sc">*</span> <span class="dv">7</span> <span class="co"># contact * infectious probability  </span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>reproduction_no <span class="ot">=</span> beta<span class="sc">/</span> rate_of_recovery   </span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co"># follow up period  </span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>follow.up <span class="ot">=</span> <span class="dv">100</span>   </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>initial_exposed <span class="ot">=</span> <span class="dv">5000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="children-vs-adults-2" class="level3">
+<h3 class="anchored" data-anchor-id="children-vs-adults-2">Children vs Adults</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># susceptible  </span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>susc.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_susceptible  </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>susc.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_susceptible   </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># exposed   </span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>exp.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_exposed  </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>exp.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_exposed   </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co"># recovered   </span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>recv.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_recovered  </span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>recv.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_recovered   </span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>Infected <span class="ot">=</span> <span class="dv">0</span> </span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>Infected<span class="fl">.2</span> <span class="ot">=</span> <span class="dv">1</span>   </span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>initial_state <span class="ot">=</span> <span class="fu">c</span>(susc.adult, susc.child,exp.adult, exp.child,Infected, Infected<span class="fl">.2</span>, recv.adult, recv.child) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="exposion-rate-and-effective-contact-rates-2" class="level2">
+<h2 class="anchored" data-anchor-id="exposion-rate-and-effective-contact-rates-2">Exposion Rate and Effective Contact Rates</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exposion rate  </span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>latency.period <span class="ot">=</span> <span class="dv">30</span>  </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span> latency.period   </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># effective contact rate  </span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">7</span>  </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">6</span>  </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>child.contact <span class="ot">=</span> <span class="dv">13</span>   </span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">10</span>  </span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">1</span>  </span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>adult.contact <span class="ot">=</span> <span class="dv">11</span>   </span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="co"># The rho child and adult  </span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>c2c <span class="ot">=</span> child.<span class="fl">2.</span>child.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta  </span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>c2a <span class="ot">=</span> child.<span class="fl">2.</span>adult.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta    </span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="co"># rho adult  </span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>a2a <span class="ot">=</span> adult.<span class="fl">2.</span>adult.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta  </span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>a2c <span class="ot">=</span> adult.<span class="fl">2.</span>child.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta   </span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="co"># parameters   </span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>parameters <span class="ot">=</span> <span class="fu">c</span>(a2a, a2c, c2c, c2a,<span class="at">gamma =</span> rate_of_recovery,<span class="at">delta =</span> delta)   </span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="co"># time  </span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>time <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">1</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="seir-model-function-2" class="level2">
+<h2 class="anchored" data-anchor-id="seir-model-function-2">SEIR model function</h2>
+<section id="potential-output-2" class="level3">
+<h3 class="anchored" data-anchor-id="potential-output-2">Potential Output</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>seir_out <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">lsoda</span>(initial_state,time,seir_func,parameters, <span class="at">maxsteps =</span> <span class="dv">10000</span>))  </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>seir_out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   time             1             2         3         4         5           6
+1     0  7.350000e+03  3.150000e+03  3500.000 1500.0000    0.0000     1.00000
+2     1 -3.937119e-11 -1.687337e-11 10522.004 4509.4305  309.6275   123.20147
+3     2 -2.311824e-09 -9.907817e-10 10177.052 4361.5938  597.3965   213.85486
+4     3 -2.246257e-09 -9.626814e-10  9843.409 4218.6037  840.7249   266.52982
+5     4 -9.287391e-09 -3.980310e-09  9520.703 4080.3014 1045.1828   286.58476
+6     5  1.295454e-08  5.551947e-09  9208.578 3946.5333 1215.6747   278.71899
+7     6 -4.348918e-09 -1.863820e-09  8906.685 3817.1505 1356.5176   247.05159
+8     7  4.198642e-10  1.799416e-10  8614.689 3692.0094 1471.5106   195.18982
+9     8  1.144342e-11  4.904319e-12  8332.266 3570.9710 1563.9961   126.29073
+10    9  1.625103e-13  6.964720e-14  8059.101 3453.9006 1636.9138    43.11457
+11   10 -4.968312e-13 -2.129275e-13  7794.893 3340.6683 1692.8479   -51.92773
+12   11  6.285327e-13  2.693709e-13  7539.346 3231.1481 1734.0701  -156.73234
+13   12 -3.125223e-12 -1.339380e-12  7292.177 3125.2185 1762.5760  -269.46600
+14   13  2.329746e-12  9.984616e-13  7053.111 3022.7617 1780.1178  -388.53334
+15   14  1.644206e-13  7.046591e-14  6821.882 2923.6637 1788.2335  -512.54823
+16   15  1.238939e-11  5.309733e-12  6598.234 2827.8146 1788.2720  -640.30843
+17   16 -7.819487e-12 -3.351206e-12  6381.918 2735.1079 1781.4161  -770.77343
+18   17  1.739974e-11  7.457026e-12  6172.694 2645.4404 1768.7016  -903.04455
+19   18  5.766728e-11  2.471453e-11  5970.329 2558.7125 1751.0357 -1036.34768
+20   19 -1.432230e-10 -6.138123e-11  5774.598 2474.8279 1729.2112 -1170.01818
+21   20 -4.734586e-10 -2.029106e-10  5585.285 2393.6934 1703.9214 -1303.48738
+22   21  2.763979e-10  1.184561e-10  5402.177 2315.2188 1675.7709 -1436.27067
+23   22  4.644452e-09  1.990478e-09  5225.073 2239.3169 1645.2872 -1567.95696
+24   23  1.834988e-08  7.864226e-09  5053.775 2165.9034 1612.9293 -1698.19954
+25   24  6.669017e-08  2.858148e-08  4888.092 2094.8966 1579.0965 -1826.70805
+26   25  3.083261e-07  1.321396e-07  4727.841 2026.2177 1544.1349 -1953.24140
+27   26  1.387062e-06  5.944546e-07  4572.844 1959.7904 1508.3447 -2077.60142
+28   27  8.026148e-08  3.439775e-08  4422.929 1895.5408 1471.9849 -2199.62726
+29   28 -1.079802e-09 -4.627724e-10  4277.928 1833.3976 1435.2793 -2319.19057
+30   29 -6.958786e-11 -2.982324e-11  4137.681 1773.2917 1398.4194 -2436.19165
+31   30  3.040720e-09  1.303166e-09  4002.031 1715.1564 1361.5697 -2550.55519
+32   31  1.338283e-09  5.735501e-10  3870.829 1658.9269 1324.8708 -2662.22662
+33   32 -1.735016e-09 -7.435785e-10  3743.929 1604.5409 1288.4424 -2771.16976
+34   33 -2.402474e-09 -1.029632e-09  3621.188 1551.9377 1252.3861 -2877.36359
+35   34 -5.234869e-09 -2.243517e-09  3502.471 1501.0591 1216.7856 -2980.80230
+36   35 -2.268173e-09 -9.720745e-10  3387.647 1451.8485 1181.7105 -3081.49153
+37   36  1.968499e-09  8.436430e-10  3276.586 1404.2512 1147.2191 -3179.44590
+38   37 -8.281359e-10 -3.549153e-10  3169.167 1358.2144 1113.3592 -3274.68827
+39   38  4.225088e-08  1.810753e-08  3065.269 1313.6868 1080.1687 -3367.24883
+40   39 -3.575028e-07 -1.532155e-07  2964.778 1270.6191 1047.6775 -3457.16380
+41   40  3.467941e-10  1.486261e-10  2867.580 1228.9628 1015.9081 -3544.47477
+42   41 -2.417594e-11 -1.036112e-11  2773.566 1188.6711  984.8776 -3629.22761
+43   42  5.373371e-11  2.302874e-11  2682.638 1149.7021  954.5964 -3711.46743
+44   43  2.817300e-10  1.207415e-10  2594.692 1112.0107  925.0721 -3791.24695
+45   44 -7.066694e-11 -3.028584e-11  2509.628 1075.5548  896.3076 -3868.61934
+46   45  3.421088e-12  1.466181e-12  2427.353 1040.2940  868.3024 -3943.63883
+47   46  6.805892e-11  2.916812e-11  2347.775 1006.1893  841.0534 -4016.36091
+48   47 -4.911366e-10 -2.104872e-10  2270.806  973.2025  814.5548 -4086.84185
+49   48  1.062169e-09  4.552154e-10  2196.360  941.2971  788.7989 -4155.13828
+50   49 -4.772036e-09 -2.045159e-09  2124.355  910.4376  763.7760 -4221.30711
+51   50  1.659685e-08  7.112939e-09  2054.710  880.5899  739.4751 -4285.40505
+           7        8
+1   3150.000 1350.000
+2   3168.368 1368.368
+3   3225.551 1425.551
+4   3315.866 1515.866
+5   3434.114 1634.114
+6   3575.748 1775.748
+7   3736.798 1936.798
+8   3913.801 2113.801
+9   4103.738 2303.738
+10  4303.985 2503.985
+11  4512.259 2712.259
+12  4726.584 2926.584
+13  4945.247 3145.247
+14  5166.772 3366.772
+15  5389.884 3589.884
+16  5613.494 3813.494
+17  5836.666 4036.666
+18  6058.604 4258.604
+19  6278.635 4478.635
+20  6496.190 4696.190
+21  6710.794 4910.794
+22  6922.052 5122.052
+23  7129.640 5329.640
+24  7333.296 5533.296
+25  7532.811 5732.811
+26  7728.024 5928.024
+27  7918.811 6118.811
+28  8105.086 6305.086
+29  8286.793 6486.793
+30  8463.900 6663.900
+31  8636.399 6836.399
+32  8804.300 7004.300
+33  8967.629 7167.629
+34  9126.426 7326.426
+35  9280.743 7480.743
+36  9430.643 7630.643
+37  9576.195 7776.195
+38  9717.474 7917.474
+39  9854.562 8054.562
+40  9987.545 8187.545
+41 10116.512 8316.512
+42 10241.557 8441.557
+43 10362.765 8562.765
+44 10480.236 8680.236
+45 10594.065 8794.065
+46 10704.345 8904.345
+47 10811.172 9011.172
+48 10914.639 9114.639
+49 11014.841 9214.841
+50 11111.869 9311.869
+51 11205.815 9405.815</code></pre>
+</div>
+</div>
+</section>
+<section id="label-the-colums-2" class="level3">
+<h3 class="anchored" data-anchor-id="label-the-colums-2">Label the colums</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(seir_out) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"time"</span>,<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>, <span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>,<span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>, <span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plot-for-30-intervention" class="level3">
+<h3 class="anchored" data-anchor-id="plot-for-30-intervention">plot for 30% intervention</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>seir_long <span class="ot">=</span> seir_out <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>,<span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>,<span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>,<span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>),<span class="at">names_to =</span> <span class="st">"state"</span>,<span class="at">values_to =</span> <span class="st">"value"</span> )   </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot  </span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> seir_long,<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> value, <span class="at">colour =</span> state, <span class="at">group =</span> state)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span><span class="fu">labs</span>(<span class="at">colour =</span> <span class="st">"Compartment"</span>,<span class="at">title =</span> <span class="st">"SEIR at 30% intervention"</span>, <span class="at">x=</span><span class="st">"Time (days)"</span>,<span class="at">y =</span> <span class="st">"Number of people"</span>)<span class="sc">+</span><span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="SEIR_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="modeling-50-intervention" class="level1">
+<h1>Modeling 50% intervention</h1>
+<section id="set-up-2" class="level3">
+<h3 class="anchored" data-anchor-id="set-up-2">set up</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># population separation  # Susceptible Individuals  </span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>vaccinated_prop <span class="ot">=</span> <span class="fl">0.5</span> </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>initial_susceptible <span class="ot">=</span> (<span class="dv">1</span> <span class="sc">-</span> vaccinated_prop) <span class="sc">*</span> Total_pop </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>initial_recovered <span class="ot">=</span> vaccinated_prop <span class="sc">*</span> Total_pop  </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>infectious_period <span class="ot">=</span> <span class="dv">8</span>  </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>rate_of_recovery <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">8</span> <span class="co"># gamma  </span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>contact_rate <span class="ot">=</span> <span class="dv">7</span>  </span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>infectious_prob <span class="ot">=</span> <span class="fl">0.07</span>  </span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">=</span> <span class="fl">0.07</span> <span class="sc">*</span> <span class="dv">7</span> <span class="co"># contact * infectious probability  </span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>reproduction_no <span class="ot">=</span> beta<span class="sc">/</span> rate_of_recovery   </span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co"># follow up period  </span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>follow.up <span class="ot">=</span> <span class="dv">100</span>   </span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>initial_exposed <span class="ot">=</span> <span class="dv">5000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="children-vs-adults-3" class="level3">
+<h3 class="anchored" data-anchor-id="children-vs-adults-3">Children vs Adults</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># susceptible  </span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>susc.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_susceptible  </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>susc.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_susceptible   </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># exposed   </span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>exp.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_exposed  </span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>exp.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_exposed   </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="co"># recovered   </span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>recv.child <span class="ot">=</span> child.prop <span class="sc">*</span> initial_recovered  </span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>recv.adult <span class="ot">=</span> adult.prop <span class="sc">*</span> initial_recovered   </span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>Infected <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>Infected<span class="fl">.2</span> <span class="ot">=</span> <span class="dv">0</span>   </span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>initial_state <span class="ot">=</span> <span class="fu">c</span>(susc.adult, susc.child,exp.adult, exp.child,Infected, Infected<span class="fl">.2</span>, recv.adult, recv.child) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="exposion-rate-and-effective-contact-rates-3" class="level2">
+<h2 class="anchored" data-anchor-id="exposion-rate-and-effective-contact-rates-3">Exposion Rate and Effective Contact Rates</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exposion rate  </span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>latency.period <span class="ot">=</span> <span class="dv">30</span>  </span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span> latency.period   </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># effective contact rate  </span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">7</span>  </span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>child.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">6</span>  </span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>child.contact <span class="ot">=</span> <span class="dv">13</span>   </span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>adult.contact <span class="ot">=</span> <span class="dv">10</span>  </span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>adult.<span class="fl">2.</span>child.contact <span class="ot">=</span> <span class="dv">1</span>  </span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>adult.contact <span class="ot">=</span> <span class="dv">11</span>   </span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="co"># The rho child and adult  </span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>c2c <span class="ot">=</span> child.<span class="fl">2.</span>child.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta  </span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>c2a <span class="ot">=</span> child.<span class="fl">2.</span>adult.contact<span class="sc">/</span>child.contact <span class="sc">*</span> beta    </span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a><span class="co"># rho adult  </span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>a2a <span class="ot">=</span> adult.<span class="fl">2.</span>adult.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta  </span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>a2c <span class="ot">=</span> adult.<span class="fl">2.</span>child.contact<span class="sc">/</span>adult.contact <span class="sc">*</span> beta   </span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a><span class="co"># parameters   </span></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>parameters <span class="ot">=</span> <span class="fu">c</span>(a2a, a2c, c2c, c2a,<span class="at">gamma =</span> rate_of_recovery,<span class="at">delta =</span> delta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="seir-model-function-3" class="level2">
+<h2 class="anchored" data-anchor-id="seir-model-function-3">SEIR model function</h2>
+<section id="potential-output-3" class="level3">
+<h3 class="anchored" data-anchor-id="potential-output-3">Potential Output</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>seir_out <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">lsoda</span>(initial_state,time,seir_func,parameters, <span class="at">maxsteps =</span> <span class="dv">10000</span>))  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.50264e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.50264e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.50264e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.50264e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.24472e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.24472e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.24472e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.24472e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.03107e-15
+ 
+DLSODA-  Warning..Internal T (=R1) and H (=R2) are
+      such that in the machine, T + H = T on the next step  
+     (H = step size). Solver will continue anyway.
+In above message, R1 = 23.4737, R2 = 1.03107e-15
+ 
+DLSODA-  Above warning has been issued I1 times.  
+     It will not be issued again for this problem.
+In above message, I1 = 10
+ 
+DLSODA-  At current T (=R1), MXSTEP (=I1) steps   
+      taken on this call before reaching TOUT     
+In above message, I1 = 10000
+ 
+In above message, R1 = 23.4737
+ </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in lsoda(initial_state, time, seir_func, parameters, maxsteps = 10000):
+an excessive amount of work (&gt; maxsteps ) was done, but integration was not
+successful - increase maxsteps</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in lsoda(initial_state, time, seir_func, parameters, maxsteps = 10000):
+Returning early. Results are accurate, as far as they go</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>seir_out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       time              1              2              3              4
+1   0.00000   5.250000e+03   2.250000e+03   3.500000e+03   1.500000e+03
+2   1.00000  -4.777346e-08  -2.047434e-08   8.483577e+03   3.635819e+03
+3   2.00000  -1.125587e-09  -4.823943e-10   8.205452e+03   3.516622e+03
+4   3.00000   1.586254e-08   6.798233e-09   7.936445e+03   3.401334e+03
+5   4.00000   1.992237e-08   8.538160e-09   7.676258e+03   3.289825e+03
+6   5.00000   1.390074e-07   5.957462e-08   7.424600e+03   3.181971e+03
+7   6.00000  -1.100952e-07  -4.718363e-08   7.181193e+03   3.077654e+03
+8   7.00000   9.444577e-08   4.047674e-08   6.945765e+03   2.976756e+03
+9   8.00000   3.991456e-08   1.710624e-08   6.718056e+03   2.879167e+03
+10  9.00000   5.202874e-10   2.229806e-10   6.497812e+03   2.784776e+03
+11 10.00000  -4.814556e-10  -2.063384e-10   6.284788e+03   2.693481e+03
+12 11.00000   1.190954e-10   5.104096e-11   6.078748e+03   2.605178e+03
+13 12.00000   8.102121e-11   3.472342e-11   5.879463e+03   2.519770e+03
+14 13.00000  -1.943596e-09  -8.329709e-10   5.686711e+03   2.437162e+03
+15 14.00000   2.540994e-09   1.088999e-09   5.500279e+03   2.357262e+03
+16 15.00000  -4.628397e-10  -1.983602e-10   5.319958e+03   2.279982e+03
+17 16.00000  -1.294240e-08  -5.546753e-09   5.145549e+03   2.205235e+03
+18 17.00000   3.593643e-08   1.540135e-08   4.976858e+03   2.132939e+03
+19 18.00000   3.967411e-08   1.700322e-08   4.813697e+03   2.063013e+03
+20 19.00000  -2.699069e-07  -1.156746e-07   4.655886e+03   1.995380e+03
+21 20.00000  -7.050761e-07  -3.021759e-07   4.503247e+03   1.929963e+03
+22 21.00000   1.362935e-08   5.841157e-09   4.355613e+03   1.866691e+03
+23 22.00000   4.454854e-06   1.909226e-06   4.212819e+03   1.805494e+03
+24 23.00000   1.799659e-05   7.712835e-06   4.074707e+03   1.746303e+03
+25 23.47366  8.847259e+205  3.791688e+205 -8.847259e+205 -3.791688e+205
+                5              6        7        8
+1    1.000000e+00   0.000000e+00 5250.000 2250.000
+2    2.522732e+02   9.903121e+01 5265.150 2265.150
+3    4.839834e+02   1.718130e+02 5311.565 2311.565
+4    6.798992e+02   2.140107e+02 5384.656 2384.656
+5    8.445069e+02   2.299398e+02 5480.236 2480.236
+6    9.817572e+02   2.233857e+02 5594.643 2594.643
+7    1.095127e+03   1.976660e+02 5724.680 2724.680
+8    1.187677e+03   1.556861e+02 5867.557 2867.557
+9    1.262100e+03   9.998882e+01 6020.844 3020.844
+10   1.320762e+03   3.279749e+01 6182.426 3182.426
+11   1.365747e+03  -4.394595e+01 6350.465 3350.465
+12   1.398882e+03  -1.285471e+02 6523.369 3523.369
+13   1.421777e+03  -2.195294e+02 6699.760 3699.760
+14   1.435843e+03  -3.156080e+02 6878.446 3878.446
+15   1.442317e+03  -4.156665e+02 7058.404 4058.404
+16   1.442287e+03  -5.187366e+02 7238.755 4238.755
+17   1.436706e+03  -6.239804e+02 7418.745 4418.745
+18   1.426407e+03  -7.306739e+02 7597.735 4597.735
+19   1.412122e+03  -8.381941e+02 7775.181 4775.181
+20   1.394488e+03  -9.460057e+02 7950.626 4950.626
+21   1.374065e+03  -1.053651e+03 8123.687 5123.687
+22   1.351339e+03  -1.160739e+03 8294.047 5294.047
+23   1.326736e+03  -1.266939e+03 8461.444 5461.444
+24   1.300625e+03  -1.371972e+03 8625.669 5625.669
+25 -2.902743e+102 -1.244035e+102 8619.896 5619.896</code></pre>
+</div>
+</div>
+</section>
+<section id="label-the-colums-3" class="level3">
+<h3 class="anchored" data-anchor-id="label-the-colums-3">Label the colums</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(seir_out) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"time"</span>,<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>, <span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>,<span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>, <span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="plot-for-50-intervention" class="level2">
+<h2 class="anchored" data-anchor-id="plot-for-50-intervention">plot for 50% intervention</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>seir_long <span class="ot">=</span> seir_out <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"susc.adult"</span>, <span class="st">"susc.child"</span>,<span class="st">"exp.adult"</span>, <span class="st">"exp.child"</span>,<span class="st">"Infected.adult"</span>, <span class="st">"Infected.child"</span>,<span class="st">"recv.adult"</span>, <span class="st">"recv.child"</span>),<span class="at">names_to =</span> <span class="st">"state"</span>,<span class="at">values_to =</span> <span class="st">"value"</span> )   </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot  </span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> seir_long,<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> value, <span class="at">colour =</span> state, <span class="at">group =</span> state)) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span><span class="fu">labs</span>(<span class="at">colour =</span> <span class="st">"Compartment"</span>,<span class="at">title =</span> <span class="st">"SEIR at 50% intervention"</span>, <span class="at">x=</span><span class="st">"Time (days)"</span>,<span class="at">y =</span> <span class="st">"Number of people"</span>)<span class="sc">+</span><span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="SEIR_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</section>
+<section id="section-2" class="level2">
+<h2 class="anchored" data-anchor-id="section-2"></h2>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

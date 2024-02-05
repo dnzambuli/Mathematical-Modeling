@@ -1,0 +1,496 @@
+---
+title: "SEIR with Intervention Assignment"
+author: "Nzambuli Daniel"
+date: "2024-02-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Task
+
+## Information
+
+**Parameters of Interest:** : Contact Rate (7), Transmission Probability (0.07), infectiousness Period (8), latency Period (30)
+
+**Disease Dynamic Parameters and Initial Values**: Exposed (5000), Susceptible (9999), Infected (1), Recovered (0)
+
+**State Values**
+
+-   Susceptible: susceptible/Total population
+
+-   Exposed: exposed/Total population
+
+-   Infected: infected/Total population
+
+-   Recovered: recovered/Total population
+
+-   Time Period for Monitoring: 50 days
+
+## Goal
+
+1.  Present the Schematic Framework to Conceptualize Compartments (Sub-populations) when Modeling Age-Groups:
+    -   **Objective:** Model age-groups, considering that susceptible children experience the force of infection, while susceptible adults become infected at a constant rate.
+    -   **Assumptions:**
+        1.  Children make 13 contacts per day on average, with 7 contacts being with other children.
+        2.  Adults make 11 contacts per day on average, with 10 contacts being with other adults.
+    -   **Schematic Framework:** Illustrate the compartments and interactions between age-groups.
+2.  Simulate the SEIR Epidemic and Plot Different Sub-populations:
+    -   **Objective:** Implement the SEIR model based on the provided parameters and initial values.
+    -   **Steps:**
+        1.  Define the SEIR model equations incorporating age-group-specific contact rates.
+        2.  Utilize the provided initial values to simulate the epidemic over a 50-day period.
+        3.  Plot the trajectories of Susceptible, Exposed, Infected, and Recovered sub-populations over time.
+3.  Evaluate and Discuss Changes with Vaccination:
+    -   **Objective:** Assume a vaccine with 100% effectiveness against acquiring infections and analyze its impact on sub-populations.
+    -   **Steps:**
+        1.  Introduce vaccination into the model, varying vaccination percentages (10%, 20%, 30%, 50%).
+        2.  Simulate and observe changes in the trajectories of Susceptible, Exposed, Infected, and Recovered sub-populations.
+        3.  Discuss how different vaccination rates influence the epidemic dynamics
+
+::: {style="background-color: #f6bebo;"}
+## Reminder
+
+-   **Susceptible** – individuals who have not been exposed to the virus
+
+-   **Exposed** – individuals exposed to the virus, but not yet infectious
+
+-   **Infectious** – exposed individuals who go on to become infected
+
+-   **Recovered** – infectious individuals who recover and become immune to the virus
+
+-   **infectiousness period** – `time interval during which a host (individual or patient) is infectious`, i.e. capable of directly or indirectly transmitting pathogenic infectious agents or pathogens to another susceptible host.
+
+**Population** $N$ – sum of the individuals in the four compartments.
+
+1.  $\beta\ -\ Beta$
+
+**Transmission coefficient** – The average number of `infectious contacts` an infected infectious individual makes each time period. *High beta* means that the disease has `more opportunity` to spread.
+
+$$ contact\ rate * transmission\ probability $$
+
+2.  $\sigma\ -\ Sigma$ or $\delta\ Delta$
+
+**Exposed individuals become infectious** – The reciprocal of the average time it takes to become infectious. Exposion rate.
+
+$$\frac{1}{latency\ period}$$
+
+3.  $\gamma\ -\ Gamma$
+
+**Rate of Recovery** – the reciprocal of the average time it takes to recover.
+
+$$ \frac{1}{infectious\ period} $$
+
+4\. $\mu\ -\ miu$
+
+**Mortality rate** – mortality rate of infectious individuals.
+
+the higher the $\mu$ the more deadly the disease is
+
+**Reproduction Number**
+
+$$ Recovery\ Number\ (RO) = \frac{Beta}{Gamma(recovery\ rate)}=\frac{\beta}{\gamma} $$
+:::
+
+# Working
+
+```{r}
+library(deSolve)
+library(tidyverse)
+library(DiagrammeR)
+```
+
+### States
+
+```{r}
+grViz("digraph flowchart {
+      graph [layout = dot,
+       rankdir = LR]
+      node [fontname = Helvetica, shape = rectangle,]
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3'] 
+      tab4 [label = '@@4']
+      # edge definitions with the node IDs
+      tab1 -> tab2;
+      tab2 -> tab3;
+      tab3 -> tab4;
+      }
+
+      [1]: 'Susceptible'
+      [2]: 'Exposed'
+      [3]: 'Infected'
+      [4]: 'Recovered'
+      ")
+```
+
+## Parameters
+
+> Disease parameters
+>
+> -   Contact Rate (7)
+>
+> -   Transmission Probability (0.07)
+>
+> -   Infectiousness Period (8)
+>
+> -   Latency Period (30)
+>
+> Population parameters
+>
+> -   Exposed (5000)
+>
+> -   Susceptible (9999)
+>
+> -   Infected (1)
+>
+> -   Recovered (0)
+
+::: {style="background-color: #d3d4d4;"}
+1.  Children make 13 contacts per day on average, with 7 contacts being with other children.
+2.  Adults make 11 contacts per day on average, with 10 contacts being with other adults.
+3.  Children are 30% of the population.
+:::
+
+discoveries$$
+N = N_{adult} + N_{children}\\
+N_{children} = 0.3 N
+$$
+
+-   vaccination `does not` modify **exposure** and **infection**
+
+-   susceptible children are expressed as $S_x$
+
+$$
+s_x = propotion\ *\ succeptible
+$$
+
+-   introducing intervention $v$ to $i$ % of the population creates a vaccinated population $v = i\ *\ N$
+
+-   susceptible children $s_c$ needs to be modified to become
+
+$$
+S_c = 0.3 * 9999\\
+S_c = S_c - (0.3 * V_c)
+$$
+
+```{r}
+# initial population data
+Exposed = 5000
+Susceptible = 9999
+Infected = 1
+Recovered = 0
+
+N = Exposed + Susceptible + Infected + Recovered
+```
+
+### Disease Parameters
+
+```{r}
+Contact.Rate = 7
+Transmission.Probability = 0.07
+Infectiousness.Period = 8
+Latency.Period = 30
+
+# gamma beta delta
+gamma = 1/Infectiousness.Period
+beta = Contact.Rate * Transmission.Probability
+delta = 1/Latency.Period
+```
+
+### Interventions and Division of Population
+
+```{r}
+inter.1 = 0.1
+inter.2 = 0.2
+inter.3 = 0.3
+inter.5 = 0.5
+
+# percentage child  and adult
+child.perc = 0.3
+adult.perc = 0.7
+
+# dividing into adult and children
+
+# children
+s.child = child.perc * Susceptible
+e.child = child.perc * Exposed
+i.child = child.perc * Infected
+r.child = 0
+
+# adults
+s.adult = adult.perc * Susceptible
+e.adult = adult.perc * Exposed
+i.adult = adult.perc * Infected
+r.adult = 0
+
+```
+
+#### Introducing Vaccination
+
+**Remember** vaccination doesn't change `exposure` and `infection`
+
+```{r}
+# introducing vaccination
+vac.1 = inter.1 * N
+
+# child intervention introduced
+vac.child = child.perc * vac.1
+s.V.child = s.child - vac.child
+e.v.child = e.child
+i.v.child = i.child
+r.v.child = r.child + vac.child
+
+# adult intervention introduced
+vac.adult = adult.perc * vac.1
+s.v.adult = s.adult - vac.adult
+e.v.adult = e.adult
+i.v.adult = i.adult
+r.v.adult = r.adult + vac.adult
+```
+
+## SEIR function
+
+#### Beta for individual interaction
+
+```{r}
+c2c.beta = (7 * Transmission.Probability)/ Infectiousness.Period
+c2a.beta = (6 * Transmission.Probability)/ Infectiousness.Period
+
+# adult 
+a2a.beta = (10 * Transmission.Probability)/ Infectiousness.Period
+a2c.beta = (1 * Transmission.Probability)/ Infectiousness.Period
+```
+
+```{r}
+initial_state = c(s.V.child, s.v.adult,
+                  e.v.child, e.v.adult,
+                  i.v.child, i.v.adult,
+                  r.v.child, r.v.adult)
+parameters = c(gamma = gamma,
+               c2c.beta, c2a.beta, a2a.beta, a2c.beta,
+               delta = delta)
+time = seq(0, 100, 1)
+```
+
+### The function
+
+```{r}
+seir.func = function(time, state, parameters){
+  S1 = state[1]
+  S2 = state[2]
+  E1 = state[3]
+  E2 = state[4]
+  I1 = state[5]
+  I2 = state[6]
+  R1 = state[7]
+  R2 = state[8]
+  with(as.list(parameters),{
+    # number of children
+    nc = S1 + E1 + I1 + R1
+    # number of adults
+    na = S2 + E2 + I2 + R2
+    
+    # derivative functions
+    dS1 = -(c2c.beta + c2a.beta) * (S1 * I1)/nc
+    dE1 = (c2c.beta + c2a.beta) * ((S1 * I1)/nc) - delta * E1
+    dI1 = delta * E1 - gamma *I1
+    dR1 = gamma * I1
+    
+    # adults
+    dS2 = -(a2a.beta + a2c.beta) * (S2 * I2)/na
+    dE2 = (a2a.beta + a2c.beta) * ((S2 * I2)/na) - delta * E2
+    dI2 = delta * E2 - gamma *I2
+    dR2 = gamma * I2
+    
+    result = c(dS1, dS2,
+               dE1, dE2,
+               dI1, dI2,
+               dR1, dR2)
+    return(list(result))
+  })
+
+  }
+```
+
+## Generating Output
+
+```{r}
+seir_10_out = as.data.frame(lsoda(initial_state,time,seir.func,parameters))
+seir_10_out
+```
+
+```{r}
+colnames(seir_10_out) = c("time","susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult")
+```
+
+### converting to long format
+
+```{r}
+seir_10_long = seir_10_out %>% pivot_longer(cols = c("susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult"),names_to = "state",values_to = "value"
+)
+seir_10_long
+```
+
+### Plot for 10% intervention
+
+```{r}
+ggplot(data = seir_10_long,aes(x = time, y = value, colour = state, group = state)) + geom_line() + labs(colour = "Compartment",title = "SEIR at 10% intervention",x="Time (days)",y = "Number of people")+theme_minimal()
+```
+
+> At `10 %` intervention there is a near intersection between infected adults and recovered adults.
+>
+> A hypothesis of increasing vaccination may lead to an equilibrium developing is developed and testing done.
+
+# 20 %
+
+#### Introducing Vaccination
+
+**Remember** vaccination doesn't change `exposure` and `infection`
+
+```{r}
+# introducing vaccination 
+vac.2 = inter.2 * N  
+# child intervention introduced 
+vac.child = child.perc * vac.2 
+s.V.child = s.child - vac.child 
+e.v.child = e.child 
+i.v.child = i.child 
+r.v.child = r.child + vac.child  
+# adult intervention introduced 
+vac.adult = adult.perc * vac.2
+s.v.adult = s.adult - vac.adult 
+e.v.adult = e.adult 
+i.v.adult = i.adult 
+r.v.adult = r.adult + vac.adult
+```
+
+## Generating Output
+
+```{r}
+seir_20_out = as.data.frame(lsoda(initial_state,time,seir.func,parameters)) 
+seir_20_out
+```
+
+```{r}
+colnames(seir_20_out) = c("time","susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult")
+```
+
+### converting to long format
+
+```{r}
+seir_20_long = seir_20_out %>% pivot_longer(cols = c("susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult"),names_to = "state",values_to = "value" ) 
+seir_20_long
+```
+
+### Plot for 20% intervention
+
+```{r}
+ggplot(data = seir_20_long,aes(x = time, y = value, colour = state, group = state)) + geom_line() + labs(colour = "Compartment",title = "SEIR at 20% intervention",x="Time (days)",y = "Number of people")+theme_minimal()
+```
+
+> At `20 %` intervention infected children and adults never reach `1000` individuals and their number reduces from `day 12`
+>
+> Adult recovery has a steeper curve than child recovery from `day 12` as illustrated in the low infection rates.
+>
+> The exposed adults reduce in an almost `log` rate
+
+# 30 %
+
+#### Introducing Vaccination
+
+**Remember** vaccination doesn't change `exposure` and `infection`
+
+```{r}
+# introducing vaccination  
+vac.3 = inter.3 * N   
+# child intervention introduced  
+vac.child = child.perc * vac.3  
+s.V.child = s.child - vac.child  
+e.v.child = e.child  
+i.v.child = i.child  
+r.v.child = r.child + vac.child   
+# adult intervention introduced  
+vac.adult = adult.perc * vac.3 
+s.v.adult = s.adult - vac.adult  
+e.v.adult = e.adult  
+i.v.adult = i.adult  
+r.v.adult = r.adult + vac.adult
+```
+
+## Generating Output
+
+```{r}
+seir_30_out = as.data.frame(lsoda(initial_state,time,seir.func,parameters))  
+seir_30_out
+```
+
+```{r}
+colnames(seir_30_out) = c("time","susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult")
+```
+
+### converting to long format
+
+```{r}
+seir_30_long = seir_30_out %>% pivot_longer(cols = c("susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult"),names_to = "state",values_to = "value" )  
+seir_30_long
+```
+
+### Plot for 30% intervention
+
+```{r}
+ggplot(data = seir_30_long,aes(x = time, y = value, colour = state, group = state)) + geom_line() + labs(colour = "Compartment",title = "SEIR at 30% intervention",x="Time (days)",y = "Number of people")+theme_minimal()
+```
+
+> Increasing the vaccination by `10` % seems to make the graphs `less steep` this is taken to indicate the effects of the epidemic are reducing with more vaccination
+
+# 50 %
+
+#### Introducing Vaccination
+
+**Remember** vaccination doesn't change `exposure` and `infection`
+
+```{r}
+# introducing vaccination  
+vac.5 = inter.5 * N   
+# child intervention introduced  
+vac.child = child.perc * vac.5  
+s.V.child = s.child - vac.child  
+e.v.child = e.child  
+i.v.child = i.child  
+r.v.child = r.child + vac.child   
+# adult intervention introduced  
+vac.adult = adult.perc * vac.5 
+s.v.adult = s.adult - vac.adult  
+e.v.adult = e.adult  
+i.v.adult = i.adult  
+r.v.adult = r.adult + vac.adult
+```
+
+## Generating Output
+
+```{r}
+seir_50_out = as.data.frame(lsoda(initial_state,time,seir.func,parameters))  
+seir_50_out
+```
+
+```{r}
+colnames(seir_50_out) = c("time","susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult")
+```
+
+### converting to long format
+
+```{r}
+seir_50_long = seir_50_out %>% pivot_longer(cols = c("susc.child", "susc.adult","exposed.child", "exposed.adult", "infected.child", "infected.adult","recovered.child", "recovered.adult"),names_to = "state",values_to = "value" )  
+seir_50_long
+```
+
+### Plot for 50% intervention
+
+```{r}
+ggplot(data = seir_50_long,aes(x = time, y = value, colour = state, group = state)) + geom_line() + labs(colour = "Compartment",title = "SEIR at 50% intervention",x="Time (days)",y = "Number of people")+theme_minimal()
+```
+
+> There is minimal change in this case.

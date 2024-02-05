@@ -1,0 +1,619 @@
+---
+title: "SEIR Epidemic and Plotting Different Sub-populations"
+author: "Nzambuli Daniel"
+date: "30-01-2024"
+format: 
+  html:
+    fig-width: 8
+    fig-height: 4
+    code-fold: true
+---
+
+# Task
+
+## Information
+
+**Parameters of Interest:** : Contact Rate (7), Transmission Probability (0.07), infectiousness Period (8), latency Period (30)
+
+**Disease Dynamic Parameters and Initial Values**: Exposed (5000), Susceptible (9999), Infected (1), Recovered (0)
+
+**State Values**
+
+-   Susceptible: susceptible/Total population
+
+-   Exposed: exposed/Total population
+
+-   Infected: infected/Total population
+
+-   Recovered: recovered/Total population
+
+-   Time Period for Monitoring: 50 days
+
+## Goal
+
+1.  Present the Schematic Framework to Conceptualize Compartments (Sub-populations) when Modeling Age-Groups:
+    -   **Objective:** Model age-groups, considering that susceptible children experience the force of infection, while susceptible adults become infected at a constant rate.
+    -   **Assumptions:**
+        1.  Children make 13 contacts per day on average, with 7 contacts being with other children.
+        2.  Adults make 11 contacts per day on average, with 10 contacts being with other adults.
+    -   **Schematic Framework:** Illustrate the compartments and interactions between age-groups.
+2.  Simulate the SEIR Epidemic and Plot Different Sub-populations:
+    -   **Objective:** Implement the SEIR model based on the provided parameters and initial values.
+    -   **Steps:**
+        1.  Define the SEIR model equations incorporating age-group-specific contact rates.
+        2.  Utilize the provided initial values to simulate the epidemic over a 50-day period.
+        3.  Plot the trajectories of Susceptible, Exposed, Infected, and Recovered sub-populations over time.
+3.  Evaluate and Discuss Changes with Vaccination:
+    -   **Objective:** Assume a vaccine with 100% effectiveness against acquiring infections and analyze its impact on sub-populations.
+    -   **Steps:**
+        1.  Introduce vaccination into the model, varying vaccination percentages (10%, 20%, 30%, 50%).
+        2.  Simulate and observe changes in the trajectories of Susceptible, Exposed, Infected, and Recovered sub-populations.
+        3.  Discuss how different vaccination rates influence the epidemic dynamics
+
+::: {style="background-color: #f6bebo;"}
+## Reminder
+
+-   **Susceptible** – individuals who have not been exposed to the virus
+
+-   **Exposed** – individuals exposed to the virus, but not yet infectious
+
+-   **Infectious** – exposed individuals who go on to become infected
+
+-   **Recovered** – infectious individuals who recover and become immune to the virus
+
+-   **infectiousness period** – `time interval during which a host (individual or patient) is infectious`, i.e. capable of directly or indirectly transmitting pathogenic infectious agents or pathogens to another susceptible host.
+
+**Population** $N$ – sum of the individuals in the four compartments.
+
+1.  $\beta\ -\ Beta$
+
+**Transmission coefficient** – The average number of `infectious contacts` an infected infectious individual makes each time period. *High beta* means that the disease has `more opportunity` to spread.
+
+$$
+contact\ rate * transmission\ probability
+$$
+
+2.  $\sigma\ -\ Sigma$ or $\delta\ Delta$
+
+**Exposed individuals become infectious** – The reciprocal of the average time it takes to become infectious. Exposion rate.
+
+$$\frac{1}{latency\ period}$$
+
+3.  $\gamma\ -\ Gamma$
+
+**Rate of Recovery** – the reciprocal of the average time it takes to recover.
+
+$$
+\frac{1}{infectious\ period}
+$$
+
+4\. $\mu\ -\ miu$
+
+**Mortality rate** – mortality rate of infectious individuals.
+
+the higher the $\mu$ the more deadly the disease is
+
+**Reproduction Number**
+
+$$
+Recovery\ Number\ (RO) = \frac{Beta}{Gamma(recovery\ rate)}=\frac{\beta}{\gamma}
+$$
+:::
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Working
+
+## Packages
+
+```{r}
+library(deSolve)
+library(tidyverse)
+library(DiagrammeR)
+```
+
+### Relationship between different states
+
+```{r}
+grViz("digraph flowchart {
+      graph [layout = dot,
+       rankdir = LR]
+      node [fontname = Helvetica, shape = rectangle,]
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3'] 
+      tab4 [label = '@@4']
+      # edge definitions with the node IDs
+      tab1 -> tab2;
+      tab2 -> tab3;
+      tab3 -> tab4;
+      }
+
+      [1]: 'Susceptible'
+      [2]: 'Exposed'
+      [3]: 'Infected'
+      [4]: 'Recovered'
+      ")
+```
+
+## Parameters
+
+> Disease parameters
+>
+> -   Contact Rate (7)
+>
+> -   Transmission Probability (0.07)
+>
+> -   Infectiousness Period (8)
+>
+> -   Latency Period (30)
+>
+> Population parameters
+>
+> -   Exposed (5000)
+>
+> -   Susceptible (9999)
+>
+> -   Infected (1)
+>
+> -   Recovered (0)
+
+::: {style="background-color: #d3d4d4;"}
+1.  Children make 13 contacts per day on average, with 7 contacts being with other children.
+2.  Adults make 11 contacts per day on average, with 10 contacts being with other adults.
+3.  Children are 30% of the population.
+:::
+
+# Modelling 10% vaccinated population
+
+## Population Param
+
+```{r}
+Exposed = 5000
+
+Susceptible = 9999
+
+Infected = 1 # There is only one infected person; can be a child or adult
+
+Recovered = 0
+
+Total_pop = Exposed + Susceptible + Infected + Recovered
+Total_pop
+```
+
+### Distinctions
+
+```{r}
+# population separation
+child.prop = 0.3
+adult.prop = 0.7
+
+# Susceptible Individuals
+vaccinated_prop = 0.1 
+initial_susceptible = (1 - vaccinated_prop) * Total_pop
+initial_recovered = vaccinated_prop * Total_pop
+infectious_period = 8
+rate_of_recovery = 1/8 # gamma
+contact_rate = 7
+infectious_prob = 0.07
+beta = 0.07 * 7 # contact * infectious probability
+reproduction_no = beta/ rate_of_recovery
+
+# follow up period
+follow.up = 100
+
+initial_exposed = 5000
+```
+
+### Children vs Adults
+
+```{r}
+
+# susceptible
+susc.child = child.prop * initial_susceptible
+susc.adult = adult.prop * initial_susceptible
+
+# exposed 
+exp.child = child.prop * initial_exposed
+exp.adult = adult.prop * initial_exposed
+
+# recovered 
+recv.child = child.prop * initial_recovered
+recv.adult = adult.prop * initial_recovered
+
+Infected.2 = 0
+
+initial_state = c(susc.adult, susc.child,
+                  exp.adult, exp.child,
+                  Infected, Infected.2,
+                  recv.adult, recv.child)
+
+```
+
+## Exposion Rate and Effective Contact Rates
+
+```{r}
+
+# exposion rate
+latency.period = 30
+delta = 1/ latency.period
+
+# effective contact rate
+child.2.child.contact = 7
+child.2.adult.contact = 6
+child.contact = 13
+
+adult.2.adult.contact = 10
+adult.2.child.contact = 1
+adult.contact = 11
+
+# The rho child and adult
+c2c = child.2.child.contact/child.contact * beta
+c2a = child.2.adult.contact/child.contact * beta
+
+
+# rho adult
+a2a = adult.2.adult.contact/adult.contact * beta
+a2c = adult.2.child.contact/adult.contact * beta
+
+# parameters 
+parameters = c(a2a, a2c, c2c, c2a,
+               gamma = rate_of_recovery,
+               delta = delta)
+
+# time
+time = seq(0, 100, 1)
+
+```
+
+## SEIR model function
+
+```{r}
+seir_func = function(time, state, parameters){
+  # susceptible 1 adult 2 child
+  s1 = state[1]
+  s2 = state[2]
+  
+  # exposed 
+  E1 = state[3]
+  E2 = state[4]
+  
+  # infected
+  I = state[5]
+  I2 = state[6]
+  
+  # recovered
+  R1 = state[7]
+  R2 = state[8]
+  
+  with(as.list(parameters),{
+    # adul
+    n1 = s1 + E1 + I + R1
+    n2 = s2 + E2 + I2 + R1
+    # adult
+    dS1 = -(a2a + a2c) * s1 *(I + I2)
+    dE1 = ((a2a+ a2c) * s1 * (I + I2)) - (delta * E1)
+    dI1 = (delta * E1) - (gamma * I)
+    dR1 = (gamma * I)
+    
+    # children
+    dS2 = -(c2c + c2a) * s2 *(I + I2)
+    dE2 = ((c2c+ c2a) * s2 * (I + I2)) - (delta * E2)
+    dI2 = (delta * E2) - (gamma * I)
+    dR2 = (gamma * I)
+    
+    result = c(dS1, dS2,
+               dE1, dE2,
+               dI1, dI2,
+               dR1, dR2)
+    return(list(result))
+  })
+  
+}
+```
+
+### Potential Output
+
+```{r}
+library(deSolve)
+seir_out = as.data.frame(lsoda(initial_state,time,seir_func,parameters, maxsteps = 10000))
+seir_out
+```
+
+### Label the colums
+
+```{r}
+colnames(seir_out) = c("time","susc.adult", "susc.child",
+                       "exp.adult", "exp.child", 
+                       "Infected.adult", "Infected.child", 
+                       "recv.adult", "recv.child")
+```
+
+### plot for 10% intervention
+
+```{r}
+# using ggplot
+library(ggplot2)
+library(tidyverse)
+seir_long = seir_out %>% pivot_longer(cols = c("susc.adult", "susc.child",
+                                               "exp.adult", "exp.child","Infected.adult", "Infected.child", 
+                                               "recv.adult", "recv.child"), 
+                                      names_to = "state",
+                                      values_to = "value"
+)
+
+# plot
+ggplot(data = seir_long,aes(x = time, y = value, colour = state, group = state)) +
+  geom_line() + 
+  labs(colour = "Compartment",
+       title = "SEIR at 10% intervention",
+       x="Time (days)",
+       y = "Number of people")+
+  theme_minimal()
+```
+
+## 
+
+# Modelling Intervention at 20%
+
+### set up
+
+```{r}
+# population separation 
+# Susceptible Individuals 
+vaccinated_prop = 0.2
+initial_susceptible = (1 - vaccinated_prop) * Total_pop
+initial_recovered = vaccinated_prop * Total_pop 
+infectious_period = 8 
+rate_of_recovery = 1/8 # gamma 
+contact_rate = 7 
+infectious_prob = 0.07 
+beta = 0.07 * 7 # contact * infectious probability 
+reproduction_no = beta/ rate_of_recovery  
+# follow up period 
+follow.up = 100  
+initial_exposed = 5000
+```
+
+### Children vs Adults
+
+```{r}
+# susceptible 
+susc.child = child.prop * initial_susceptible 
+susc.adult = adult.prop * initial_susceptible  
+# exposed  
+exp.child = child.prop * initial_exposed 
+exp.adult = adult.prop * initial_exposed  
+# recovered  
+recv.child = child.prop * initial_recovered 
+recv.adult = adult.prop * initial_recovered  
+Infected = 0
+Infected.2 = 1  
+initial_state = c(susc.adult, susc.child,exp.adult, exp.child,Infected, Infected.2, recv.adult, recv.child) 
+```
+
+## Exposion Rate and Effective Contact Rates
+
+```{r}
+# exposion rate 
+latency.period = 30 
+delta = 1/ latency.period  
+# effective contact rate 
+child.2.child.contact = 7 
+child.2.adult.contact = 6 
+child.contact = 13  
+adult.2.adult.contact = 10 
+adult.2.child.contact = 1 
+adult.contact = 11  
+# The rho child and adult 
+c2c = child.2.child.contact/child.contact * beta 
+c2a = child.2.adult.contact/child.contact * beta   
+# rho adult 
+a2a = adult.2.adult.contact/adult.contact * beta 
+a2c = adult.2.child.contact/adult.contact * beta  
+# parameters  
+parameters = c(a2a, a2c, c2c, c2a,
+               gamma = rate_of_recovery,
+               delta = delta)  
+# time 
+time = seq(0, 50, 1) 
+```
+
+## SEIR model function
+
+### Potential Output
+
+```{r}
+seir_out = as.data.frame(lsoda(initial_state,time,seir_func,parameters, maxsteps = 10000)) 
+seir_out
+```
+
+### Label the colums
+
+```{r}
+colnames(seir_out) = c("time","susc.adult", "susc.child", "exp.adult", "exp.child","Infected.adult", "Infected.child", "recv.adult", "recv.child")
+```
+
+### plot for 20% intervention
+
+```{r}
+seir_long = seir_out %>% pivot_longer(cols = c("susc.adult", "susc.child","exp.adult", "exp.child","Infected.adult", "Infected.child","recv.adult", "recv.child"),names_to = "state",values_to = "value" )  
+# plot 
+ggplot(data = seir_long,aes(x = time, y = value, colour = state, group = state)) + geom_line() +labs(colour = "Compartment",title = "SEIR at 20% intervention", x="Time (days)",y = "Number of people")+theme_minimal()
+```
+
+## 
+
+# Modelling 30 % intervention
+
+### set up
+
+```{r}
+# population separation  
+# Susceptible Individuals  
+vaccinated_prop = 0.3 
+initial_susceptible = (1 - vaccinated_prop) * Total_pop 
+initial_recovered = vaccinated_prop * Total_pop  
+infectious_period = 8  
+rate_of_recovery = 1/8 # gamma  
+contact_rate = 7  
+infectious_prob = 0.07  
+beta = 0.07 * 7 # contact * infectious probability  
+reproduction_no = beta/ rate_of_recovery   
+# follow up period  
+follow.up = 100   
+initial_exposed = 5000
+```
+
+### Children vs Adults
+
+```{r}
+# susceptible  
+susc.child = child.prop * initial_susceptible  
+susc.adult = adult.prop * initial_susceptible   
+# exposed   
+exp.child = child.prop * initial_exposed  
+exp.adult = adult.prop * initial_exposed   
+# recovered   
+recv.child = child.prop * initial_recovered  
+recv.adult = adult.prop * initial_recovered   
+Infected = 0 
+Infected.2 = 1   
+initial_state = c(susc.adult, susc.child,exp.adult, exp.child,Infected, Infected.2, recv.adult, recv.child) 
+```
+
+## Exposion Rate and Effective Contact Rates
+
+```{r}
+# exposion rate  
+latency.period = 30  
+delta = 1/ latency.period   
+# effective contact rate  
+child.2.child.contact = 7  
+child.2.adult.contact = 6  
+child.contact = 13   
+adult.2.adult.contact = 10  
+adult.2.child.contact = 1  
+adult.contact = 11   
+# The rho child and adult  
+c2c = child.2.child.contact/child.contact * beta  
+c2a = child.2.adult.contact/child.contact * beta    
+# rho adult  
+a2a = adult.2.adult.contact/adult.contact * beta  
+a2c = adult.2.child.contact/adult.contact * beta   
+# parameters   
+parameters = c(a2a, a2c, c2c, c2a,gamma = rate_of_recovery,delta = delta)   
+# time  
+time = seq(0, 50, 1) 
+```
+
+## SEIR model function
+
+### Potential Output
+
+```{r}
+seir_out = as.data.frame(lsoda(initial_state,time,seir_func,parameters, maxsteps = 10000))  
+seir_out
+```
+
+### Label the colums
+
+```{r}
+colnames(seir_out) = c("time","susc.adult", "susc.child", "exp.adult", "exp.child","Infected.adult", "Infected.child", "recv.adult", "recv.child")
+```
+
+### plot for 30% intervention
+
+```{r}
+seir_long = seir_out %>% pivot_longer(cols = c("susc.adult", "susc.child","exp.adult", "exp.child","Infected.adult", "Infected.child","recv.adult", "recv.child"),names_to = "state",values_to = "value" )   
+# plot  
+ggplot(data = seir_long,aes(x = time, y = value, colour = state, group = state)) + geom_line() +labs(colour = "Compartment",title = "SEIR at 30% intervention", x="Time (days)",y = "Number of people")+theme_minimal()
+```
+
+# Modeling 50% intervention
+
+### set up
+
+```{r}
+# population separation  # Susceptible Individuals  
+vaccinated_prop = 0.5 
+initial_susceptible = (1 - vaccinated_prop) * Total_pop 
+initial_recovered = vaccinated_prop * Total_pop  
+infectious_period = 8  
+rate_of_recovery = 1/8 # gamma  
+contact_rate = 7  
+infectious_prob = 0.07  
+beta = 0.07 * 7 # contact * infectious probability  
+reproduction_no = beta/ rate_of_recovery   
+# follow up period  
+follow.up = 100   
+initial_exposed = 5000
+```
+
+### Children vs Adults
+
+```{r}
+# susceptible  
+susc.child = child.prop * initial_susceptible  
+susc.adult = adult.prop * initial_susceptible   
+# exposed   
+exp.child = child.prop * initial_exposed  
+exp.adult = adult.prop * initial_exposed   
+# recovered   
+recv.child = child.prop * initial_recovered  
+recv.adult = adult.prop * initial_recovered   
+Infected = 1
+Infected.2 = 0   
+initial_state = c(susc.adult, susc.child,exp.adult, exp.child,Infected, Infected.2, recv.adult, recv.child) 
+```
+
+## Exposion Rate and Effective Contact Rates
+
+```{r}
+# exposion rate  
+latency.period = 30  
+delta = 1/ latency.period   
+# effective contact rate  
+child.2.child.contact = 7  
+child.2.adult.contact = 6  
+child.contact = 13   
+adult.2.adult.contact = 10  
+adult.2.child.contact = 1  
+adult.contact = 11   
+# The rho child and adult  
+c2c = child.2.child.contact/child.contact * beta  
+c2a = child.2.adult.contact/child.contact * beta    
+# rho adult  
+a2a = adult.2.adult.contact/adult.contact * beta  
+a2c = adult.2.child.contact/adult.contact * beta   
+# parameters   
+parameters = c(a2a, a2c, c2c, c2a,gamma = rate_of_recovery,delta = delta)
+```
+
+## SEIR model function
+
+### Potential Output
+
+```{r}
+seir_out = as.data.frame(lsoda(initial_state,time,seir_func,parameters, maxsteps = 10000))  
+seir_out
+```
+
+### Label the colums
+
+```{r}
+colnames(seir_out) = c("time","susc.adult", "susc.child", "exp.adult", "exp.child","Infected.adult", "Infected.child", "recv.adult", "recv.child")
+```
+
+## plot for 50% intervention
+
+```{r}
+seir_long = seir_out %>% pivot_longer(cols = c("susc.adult", "susc.child","exp.adult", "exp.child","Infected.adult", "Infected.child","recv.adult", "recv.child"),names_to = "state",values_to = "value" )   
+# plot  
+ggplot(data = seir_long,aes(x = time, y = value, colour = state, group = state)) + geom_line() +labs(colour = "Compartment",title = "SEIR at 50% intervention", x="Time (days)",y = "Number of people")+theme_minimal()
+```
+
+## 
