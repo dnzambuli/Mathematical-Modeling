@@ -1,0 +1,78 @@
+---
+title: "Group Task"
+author: "Nzambuli Daniel", "Chesia Anika", "Brandon Gem", "Waimiri Romeo"
+date: "2024-02-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading Libraries to Model SEIR-D with Children and Adults
+
+```{r}
+library(deSolve)
+library(tidyverse)
+library(DiagrammeR)
+```
+
+## States
+
+```{r}
+grViz("digraph flowchart {
+      graph [layout = dot,
+       rankdir = LR]
+      node [fontname = Helvetica, shape = rectangle,]
+      tab1 [label = '@@1']
+      tab2 [label = '@@2']
+      tab3 [label = '@@3'] 
+      tab4 [label = '@@4']
+      tab5 [label = '@@5']
+      tab6 [label = '@@6']
+      tab7 [label = '@@7']
+      tab8 [label = '@@8']
+      tab9 [label = '@@9']
+      # edge definitions with the node IDs
+      tab1 -> tab2 [label = 'beta child'];
+      tab1 -> tab3 [label = 'beta adult'];
+      tab2 -> tab4 [label = 'kapa child'];
+      tab4 -> tab6 [label = 'mu child'];
+      tab4 -> tab8 [label = 'gamma child'];
+      tab3 -> tab5 [label = 'kapa adult'];
+      tab5 -> tab7 [label = 'mu adult'];
+      tab5 -> tab9 [label = 'gamma adult'];
+      }
+
+      [1]: 'Susceptible'
+      [2]: 'Exposed Children'
+      [3]: 'Exposed Adults'
+      [4]: 'Infected Children'
+      [5]: 'Infected Adult'
+      [6]: 'Dead Children'
+      [7]: 'Dead Adults'
+      [8]: 'Recovered Children'
+      [9]: 'Recovered Adults'
+      ")
+```
+
+The SEIRD model extends the SEIR model by adding a compartment for individuals who have succumbed to the disease. The basic flow of individuals between compartments in the SEIRD model is as follows:
+
+1.  S (Susceptible): Individuals who are not infected but can become exposed to the virus.
+2.  E (Exposed): Individuals who have been exposed to the virus but are not yet infectious.
+3.  I (Infectious): Individuals who are currently infected and can spread the disease to others.
+4.  R (Recovered): Individuals who have recovered from the infection and are assumed to be immune.
+5.  D (Dead): Individuals who have died as a result of the disease.
+
+## The Differential Equations
+
+$$
+\frac{dS(t)}{dt} = \frac{-\beta S(t)I(t)}{N_{pop}}\\ \\
+\frac{dE(t)}{dt} = \frac{+\beta S(t)I(t)}{N_{pop}} - \kappa E(t)\\ \\
+\frac{dI(t)}{dt} = -\gamma I(t) + \kappa E(t)\\ \\
+\frac{dR(t)}{dt} = +\gamma(1-\mu_h) min(\alpha I(t), I_h) + \gamma(1 - \mu_n)max(0, \alpha I(t), I_h) + \gamma(1-\alpha) I\\ \\
+\frac{dD(t)}{dt} = +\gamma \mu_h min(\alpha I(t), I_h) + \gamma \mu_n max(0, \alpha I(t), I_h)\\ \\
+\frac{dN_{pop}}{dt} = \frac{dS(t)}{dt} + \frac{dE(t)}{dt} + \frac{dI(t)}{dt} + \frac{dR(t)}{dt} + \frac{dD(t)}{dt} = 0
+$$
+
+## Initial Set-up
