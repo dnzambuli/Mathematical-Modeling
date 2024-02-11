@@ -76,3 +76,129 @@ $$
 $$
 
 ## Initial Set-up
+
+### Population Parameters
+
+```{r}
+population <- 10^6
+infectious_no <- 3
+N <- 1
+epsilon = infectious_no/population
+Ih <- 1 ### unlimited hospital capacity
+mun <- 0.95 ### 0 < mun < 1
+muh <- 1- mun
+alpha <- 0.6
+beta <- 1.2
+kappa <- 1.4
+gamma <-0.3
+
+unit_time <- 70
+
+# proportions
+child_prop = 0.3
+adult_prop = 0.7
+```
+
+> The model assumes equal
+>
+> -   death rate for children and adults
+>
+> -   hospitalization rates for children and adults
+>
+> -   transition to ICU for children and adults
+>
+> Children are proposed to be `30%` of the population
+
+### Set-up for the Model
+
+```{r}
+# child
+S_c = 0.3*  (1-epsilon)
+E_c = 0
+I_c = 0.3 * epsilon
+R_c = 0
+D_c = 0
+
+# adult
+S_a = 0.7*  (1-epsilon)
+E_a = 0
+I_a = 0.7 * epsilon
+R_a = 0
+D_a = 0
+
+# time step
+step_h = 0.001
+
+```
+
+### Parameters and State
+
+```{r}
+param = list(N = N, Ih = Ih, muh = muh, mun = mun, alpha = alpha, beta = beta, kappa = kappa, gamma = gamma, 
+          S_c = S_c, E_c = E_c, I_c = I_c, R_c = R_c, D_c = D_c,
+          S_a = S_a, E_a = E_a, I_a = I_a, R_a = R_a, D_a = D_a,
+          step_h = step_h, unit_time = unit_time)
+times <- seq(0, param$unit_time, by = param$step_h)
+state <- c(S_c = param$S_c, E_c = param$E_c, I_c = param$I_c, R_c = param$R_c, D_c = param$D_c,
+           S_a = param$S_a, E_a = param$E_a, I_a = param$I_a, R_a = param$R_a, D_a = param$D_a)
+```
+
+### SEIR-D model Function
+
+```{r}
+seir.d = function(t, states, param){
+  with(as.list(c(states, param)),{
+    # counts
+    N_c = S_c + E_c + I_c + R_c + D_c
+    N_a = S_a + E_a + I_a + R_a + D_a
+    # child
+    d.S_c = -beta * S_c * 1/N_c
+    d.E_c = +beta * S_c * 1/N_c - kappa*E_c
+    d.I_c = -gamma * I_c + kappa * E_c
+    d.R_c = +gamma * (1 - muh) * min(alpha * I_c, Ih) + gamma * (1 - mun) * max(0,(alpha * I_c) - Ih) + gamma * (1 - alpha)* I_c
+    d.D_c = +gamma * muh * min(alpha * I_c, Ih) + gamma * mun * max(0, (alpha * I_c) - Ih)
+    d.N_c = d.S_c + d.E_c + d.I_c + d.R_c + d.D_c
+    d.N_c = 0
+    
+    # adult
+    d.S_a = -beta * S_a * 1/N_a
+    d.E_a = +beta * S_a * 1/N_a - kappa*E_a
+    d.I_a = -gamma * I_a + kappa * E_a
+    d.R_a = +gamma * (1 - muh) * min(alpha * I_a, Ih) + gamma * (1 - mun) * max(0,(alpha * I_a) - Ih) + gamma * (1 - alpha)* I_a
+    d.D_a = +gamma * muh * min(alpha * I_a, Ih) + gamma * mun * max(0, (alpha * I_a) - Ih)
+    d.N_a = d.S_a + d.E_a + d.I_a + d.R_a + d.D_a
+    d.N_a = 0
+    list(c(d.S_a, d.E_a, d.I_a, d.R_a, d.D_a,
+           d.S_c, d.E_a, d.I_a, d.R_a, d.D_a))
+  })
+}
+```
+
+## Generate the Output
+
+```{r}
+out_seir.d = as.data.frame(ode(y = state, times = times,
+                               func = seir.d, parms = param))
+
+```
+
+### Output in long format
+
+```{r}
+library(tidyr)
+output_long <- out_seir.d %>%  pivot_longer(cols = c(S_c, E_c, I_c, R_c, D_c, S_a, E_a, I_a, R_a, D_a),
+                        names_to = "state",
+                        values_to = "value") 
+
+```
+
+### Plot the data 
+
+```{r}
+ggplot(data = output_long,                                               
+       aes(x = time, y = value, colour = state, group = state)) +  
+  geom_line() +                                                          
+  xlab("Time (days)")+                                                   
+  ylab("Number of people") +                                
+  labs(colour = "Compartment") 
+```
