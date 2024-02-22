@@ -31,52 +31,6 @@ The transitions between these compartments are governed by a set of differential
 knitr::include_graphics("Picture2.png")
 ```
 
-> $\mu_n$ and $\mu_h$ should equal the total unlimited hospital capacity
->
-> -   $\mu_h$ hospitalized in ICU
->
-> -   $\mu_n$ hospitalized in general ward
->
-> $\kappa$ infectious
->
-> $\beta$ exposure
->
-> $\alpha$ mortality rate – affects **Hospitalized** not **Infected**
->
-> $\gamma$ recovery rate
->
-> $I_h$ the proportion of the population that can be hospitalized
->
-> $$
-> I_h = \frac{bed\ capacity}{population\ available}
-> $$
->
-> $\epsilon$ number of people who can infect
->
-> $$
-> \epsilon = \frac{infectious\ number}{total\ population}
-> $$
->
-> **S** number susceptible
->
-> $$
-> S = 1 - \epsilon
-> $$
->
-> **N** all the individuals in the SEIR-D model. `Entire population at risk`
->
-> $$
-> N = S + E + I + D + R
-> $$
->
-> **P** the entire population $: N \in P$
->
-> -   notice that **N** starts at `1` and increases towards **P**
-> -   N is initially the first person infected
-> -   population of interest
->
-> **Time** remains constant
-
 ## Initial setting
 
 ```{r, }
@@ -142,6 +96,8 @@ ggplot(data = output_long,
   ylab("Number of people") +                                
   labs(colour = "Compartment") 
 ```
+
+Finally we plot the dynamics of Susceptibles, Exposed, Infectious and Recovered sub-populations in the same plot.
 
 ```{r}
 

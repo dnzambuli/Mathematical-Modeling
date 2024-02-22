@@ -1,6 +1,6 @@
 ---
 title: "Group Task"
-author: "Nzambuli Daniel", "Chesia Anika", "Brandon Gem", "Waimiri Romeo"
+author: "Nzambuli Daniel, Chesia Anika, Brandon Gem, Waimiri Romeo"
 date: "2024-02-10"
 output: html_document
 ---
@@ -87,112 +87,172 @@ epsilon = infectious_no/population
 Ih <- 1 ### unlimited hospital capacity
 mun <- 0.95 ### 0 < mun < 1
 muh <- 1- mun
-alpha <- 0.6
-beta <- 1.2
-kappa <- 1.4
-gamma <-0.3
+alpha0 <- 0.6
+beta0 <- 1.2
+kappa0 <- 1.4 # sigma in normal models
+gamma0 <-0.3
 
 unit_time <- 70
-
-# proportions
-child_prop = 0.3
-adult_prop = 0.7
 ```
 
-> The model assumes equal
->
-> -   death rate for children and adults
->
-> -   hospitalization rates for children and adults
->
-> -   transition to ICU for children and adults
->
-> Children are proposed to be `30%` of the population
+An assumption is made that:
 
-### Set-up for the Model
+> -   **`mun`**: The proportion of cases that are not hospitalized and die outside of hospitals.
+>
+> -   **`muh`**: The proportion of cases that are hospitalized and die within hospitals.
+>
+> finding the death rate is done by
+>
+> $$
+> \mu = (\mu_n * \alpha + \mu_h) * \epsilon
+> $$
+
+#### Disease Parameters
 
 ```{r}
-# child
-S_c = 0.3*  (1-epsilon)
-E_c = 0
-I_c = 0.3 * epsilon
-R_c = 0
-D_c = 0
-
-# adult
-S_a = 0.7*  (1-epsilon)
-E_a = 0
-I_a = 0.7 * epsilon
-R_a = 0
-D_a = 0
-
-# time step
-step_h = 0.001
-
+# gamma beta and delta 
+gamma = gamma0
+beta = beta0
+delta = kappa0
 ```
 
-### Parameters and State
+### State Parameters
+
+> -   **Epsilon** the proportion of infectious individuals
+>
+> -   **S.child/ S.adult** the ratio of children and adults who are susceptible to the disease.
+>
+> $$
+> (1 - \epsilon)\ \rightarrow ratio\ of\ people\ who\ are\ not\ already\ infected\ by\ the\ disease 
+> $$
 
 ```{r}
-param = list(N = N, Ih = Ih, muh = muh, mun = mun, alpha = alpha, beta = beta, kappa = kappa, gamma = gamma, 
-          S_c = S_c, E_c = E_c, I_c = I_c, R_c = R_c, D_c = D_c,
-          S_a = S_a, E_a = E_a, I_a = I_a, R_a = R_a, D_a = D_a,
-          step_h = step_h, unit_time = unit_time)
-times <- seq(0, param$unit_time, by = param$step_h)
-state <- c(S_c = param$S_c, E_c = param$E_c, I_c = param$I_c, R_c = param$R_c, D_c = param$D_c,
-           S_a = param$S_a, E_a = param$E_a, I_a = param$I_a, R_a = param$R_a, D_a = param$D_a)
+
+S.child = 0.3 * (1 - epsilon)
+S.adult = 0.7 * (1 - epsilon)
+E.child = 0
+E.adult = 0
+I.child = 0.3 * epsilon
+I.adult = 0.7 * epsilon
+R.child = 0
+R.adult = 0
+D.child = 0
+D.adult = 0
 ```
 
-### SEIR-D model Function
+### Transmission Probability
+
+> children have a contact rate of `13`
+>
+> -   **7** – child to child contact rate
+>
+> -   **6** – child to adult contact rate
+>
+> adult have a contact rate of `11`
+>
+> -   **10** – adult to adult contact rate
+>
+> -   **1** – child to child contact rate
 
 ```{r}
-seir.d = function(t, states, param){
-  with(as.list(c(states, param)),{
-    # counts
-    N_c = S_c + E_c + I_c + R_c + D_c
-    N_a = S_a + E_a + I_a + R_a + D_a
-    # child
-    d.S_c = -beta * S_c * 1/N_c
-    d.E_c = +beta * S_c * 1/N_c - kappa*E_c
-    d.I_c = -gamma * I_c + kappa * E_c
-    d.R_c = +gamma * (1 - muh) * min(alpha * I_c, Ih) + gamma * (1 - mun) * max(0,(alpha * I_c) - Ih) + gamma * (1 - alpha)* I_c
-    d.D_c = +gamma * muh * min(alpha * I_c, Ih) + gamma * mun * max(0, (alpha * I_c) - Ih)
-    d.N_c = d.S_c + d.E_c + d.I_c + d.R_c + d.D_c
-    d.N_c = 0
+Ro = beta/gamma
+
+c2c.beta = 7/13  * Ro * gamma
+c2a.beta = 6/13 * Ro * gamma
+
+# adult 
+a2a.beta = 10/11 * Ro * gamma
+a2c.beta = 1/11 * Ro * gamma
+```
+
+### Function to Perform SEIR-D
+
+```{r}
+seir_d <- function(time, state, parameters) {
+  S_child <- state[1]
+  E_child <- state[2]
+  I_child <- state[3]
+  R_child <- state[4]
+  D_child <- state[5]
+  S_adult <- state[6]
+  E_adult <- state[7]
+  I_adult <- state[8]
+  R_adult <- state[9]
+  D_adult <- state[10]
+  
+  with(as.list(parameters), {
+    # number of children and adults
+    N_c <- S_child + E_child + I_child + R_child + D_child
+    N_a <- S_adult + E_adult + I_adult + R_adult + D_adult
+    
+    # beta
+    beta_c <- c2c_beta + c2a_beta
+    beta_a <- a2c_beta + a2a_beta
+    
+    # differential equations
+    dS_child <- -beta_c * S_child * I_child / N_c
+    dE_child <- beta_c * S_child * I_child / N_c - delta * E_child
+    dI_child <- delta * E_child - gamma * I_child - muh * I_child * alpha0
+    dR_child <- gamma * I_child
+    dD_child <- muh * alpha0 * I_child
     
     # adult
-    d.S_a = -beta * S_a * 1/N_a
-    d.E_a = +beta * S_a * 1/N_a - kappa*E_a
-    d.I_a = -gamma * I_a + kappa * E_a
-    d.R_a = +gamma * (1 - muh) * min(alpha * I_a, Ih) + gamma * (1 - mun) * max(0,(alpha * I_a) - Ih) + gamma * (1 - alpha)* I_a
-    d.D_a = +gamma * muh * min(alpha * I_a, Ih) + gamma * mun * max(0, (alpha * I_a) - Ih)
-    d.N_a = d.S_a + d.E_a + d.I_a + d.R_a + d.D_a
-    d.N_a = 0
-    list(c(d.S_a, d.E_a, d.I_a, d.R_a, d.D_a,
-           d.S_c, d.E_a, d.I_a, d.R_a, d.D_a))
+    dS_adult <- -beta_a * (S_adult * I_adult) / N_a
+    dE_adult <- beta_a * (S_adult * I_adult) / N_a - delta * E_adult
+    dI_adult <- delta * E_adult - gamma * I_adult - muh * I_adult * alpha0
+    dR_adult <- gamma * I_adult
+    dD_adult <- muh * alpha0 * I_adult
+    
+    return(list(c(dS_child, dE_child, dI_child, dR_child, dD_child, dS_adult, dE_adult, dI_adult, dR_adult, dD_adult)))
   })
 }
 ```
+
+> the new differential equations are
+>
+> $$
+> \frac{dE}{dt} = \frac{\beta S I}{N} - \kappa E\\
+> \frac{dI}{dt} = \kappa E - (\gamma + \mu) * I\\
+> \frac{dR}{dt} = \gamma * I\\
+> \frac{dD}{dt} = \mu I
+> $$
+
+### Parameters and States
+
+```{r}
+step_h = 0.1
+state <- c(S.child = S.child, E.child = E.child, I.child = I.child, R.child = R.child, D.child = D.child, S.adult = S.adult, E.adult = E.adult, I.adult = I.adult, R.adult = R.adult, D.adult = D.adult)
+
+parameters <- c(beta = beta, kappa = kappa, gamma = gamma, delta = delta, muh = muh, alpha0 = alpha0, c2c_beta = c2c.beta, c2a_beta = c2a.beta, a2a_beta = a2a.beta, a2c_beta = a2c.beta)
+times = seq(0, unit_time, step_h)
+```
+
+> time is continuous from 0 up to the `unit time`
 
 ## Generate the Output
 
 ```{r}
 out_seir.d = as.data.frame(ode(y = state, times = times,
-                               func = seir.d, parms = param))
-
+                               func = seir_d, parms = parameters))
 ```
 
 ### Output in long format
 
 ```{r}
+colnames(out_seir.d)
+```
+
+#### Relabel Columns
+
+```{r}
 library(tidyr)
-output_long <- out_seir.d %>%  pivot_longer(cols = c(S_c, E_c, I_c, R_c, D_c, S_a, E_a, I_a, R_a, D_a),
+output_long <- out_seir.d %>%  pivot_longer(cols = c(S.child, E.child, I.child, R.child, D.child, S.adult, E.adult, I.adult, R.adult, D.adult),
                         names_to = "state",
                         values_to = "value") 
 
 ```
 
-### Plot the data 
+### Plot the data
 
 ```{r}
 ggplot(data = output_long,                                               
@@ -201,4 +261,50 @@ ggplot(data = output_long,
   xlab("Time (days)")+                                                   
   ylab("Number of people") +                                
   labs(colour = "Compartment") 
+```
+
+### Split Plots
+
+```{r}
+child_data = out_seir.d[, c("time","S.child", "E.child", "I.child", "R.child", "D.child")]
+adult_data = out_seir.d[, c("time","S.adult", "E.adult", "I.adult", "R.adult", "D.adult")]
+```
+
+### Plotting Split data
+
+```{r}
+child_long <- out_seir.d %>%  pivot_longer(cols = c(S.child, E.child, I.child, R.child, D.child),
+                        names_to = "state",
+                        values_to = "value") 
+adult_long <- out_seir.d %>%  pivot_longer(cols = c(S.adult, E.adult, I.adult, R.adult, D.adult),
+                        names_to = "state",
+                        values_to = "value") 
+```
+
+#### Child plot
+
+```{r}
+ggplot(data = child_long,                                               
+       aes(x = time, y = value, colour = state, group = state)) +  
+  geom_line() +                                                          
+  xlab("Time (days)")+                                                   
+  ylab("Number of people") +                                
+  labs(colour = "Compartment") 
+```
+
+#### Adult Long
+
+```{r}
+ggplot(data = adult_long,                                               
+       aes(x = time, y = value, colour = state, group = state)) +  
+  geom_line() +                                                          
+  xlab("Time (days)")+                                                   
+  ylab("Number of people") +                                
+  labs(colour = "Compartment") 
+```
+
+### Summary of the Model
+
+```{r}
+summary(out_seir.d)
 ```
