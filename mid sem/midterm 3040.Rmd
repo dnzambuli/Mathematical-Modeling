@@ -740,7 +740,7 @@ for (i in 1:length(pop_vac)){
 length(vaccination)
 ```
 
-#### Plot the data 
+#### Plot the data
 
 ```{r}
 ten_perc = data.frame(vaccination[1])
@@ -845,7 +845,7 @@ create_adult_plot(fifty_perc)
 
 -   A balance of these two factors based on cost of implementation can help lower the effects of a similar epidemic completely
 
-# References 
+# References
 
 -   [WHO](Hospital beds ratio (who.int)
 
