@@ -299,7 +299,7 @@ makeTransNetwork <- function(numAgents=1000,
   agentXY <- householdXY[myHousehold, ] + matrix(.15 * rnorm(length(myHousehold) * 2), ncol=2)
   neighborhood <- as.matrix(dist(agentXY)) < runif(nrow(agentXY)^2) * 2
   
-  network <- schoolmat + workmat + housemat + neighborhood
+  network <- combinedSchoolmat + workmat + housemat + neighborhood
   
   return(list(xy=agentXY, pool=pool, network=network,
               neighborhood=neighborhood,
