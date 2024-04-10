@@ -523,19 +523,19 @@ server = function(input, output) {
     }
   }, height = 900, width = 900)
   
-  renderNetworkPlot <- function(network, title) {
+  renderNetworkPlot <- function(network, title, color) {
     renderPlot({
       net <- schoolNetwork()
       if (!is.null(net) && !is.null(net[[network]])) {
-        mygplot(coord = net$xy, network = net[[network]], states = rep(1, nrow(net$xy)), main = title, edgecol = "orange")
+        mygplot(coord = net$xy, network = net[[network]], states = rep(1, nrow(net$xy)), main = title, edgecol = color)
       }
     }, height = 900, width = 900)
   }
   
-  output$PreSchoolNet <- renderNetworkPlot("preSchoolnet", "Pre-School Network")
-  output$PriSchoolNet <- renderNetworkPlot("priSchoolnet", "Primary School Network")
-  output$SecSchoolNet <- renderNetworkPlot("secSchoolnet", "Secondary School Network")
-  output$UniSchoolNet <- renderNetworkPlot("uniSchoolnet", "University Network")
+  output$PreSchoolNet <- renderNetworkPlot("preSchoolnet", "Pre-School Network", "orange")
+  output$PriSchoolNet <- renderNetworkPlot("priSchoolnet", "Primary School Network", "lightgreen")
+  output$SecSchoolNet <- renderNetworkPlot("secSchoolnet", "Secondary School Network", "purple")
+  output$UniSchoolNet <- renderNetworkPlot("uniSchoolnet", "University Network", "red")
   
     
   
