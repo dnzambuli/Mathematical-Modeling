@@ -264,9 +264,9 @@ makeTransNetwork <- function(numAgents=1000,
   
   # Assign individuals to schools and workplaces
   school <- c(sample(1:numPreSchool, numPreSchool, replace=TRUE),
-              sample(1:numPrimarySchool, numPrimarySchool, replace=TRUE) + numPreSchool,
-              sample(1:numSecondarySchool, numSecondarySchool, replace=TRUE) + numPreSchool+numPrimarySchool,
-              sample(1:numUniversity, numUniversity, replace=TRUE) + numPreSchool+numPrimarySchool+numSecondarySchool,
+              sample(numPreSchool+1:numPreSchool+numPrimarySchool, numPrimarySchool, replace=TRUE),
+              sample(numPreSchool+numPrimarySchool+1:numPreSchool+numPrimarySchool+numSecondarySchool, numSecondarySchool, replace=TRUE),
+              sample(1:numUniversity, numUniversity, replace=TRUE),
               rep(0, numAgents - numPreSchool - numPrimarySchool - numSecondarySchool - numUniversity))  # Non-students have no school
   
   employed <- sample(1:numAgents, round(0.75 * (numAgents - numPreSchool - numPrimarySchool - numSecondarySchool - numUniversity)), replace=FALSE)
@@ -380,6 +380,7 @@ ui = dashboardPage(
       tabPanel( "Age Distribution",
         h3("The age distribution across the population"),
         h1(" "),
+        h4("The preloaded values are gotten from statista.com and https://demo.education.go.ke uploaded statistics"),
         sliderInput("pre_sch", "Graduation rate from Pre-School", 0, 1, 0.053),
         sliderInput("prim_sch", "Graduation rate from Primary School", 0, 1, 0.498),
         sliderInput("sec_sch", "Graduation rate from Secondary School", 0, 1, 0.245),
@@ -396,13 +397,13 @@ ui = dashboardPage(
       ),
       tabPanel("School Network",
                h3("The distribution of schools in the environment"),
-               h5("Things to note"),
+               h4("The number of schools decrease with increase in level"),
+               h4("The lower the number of schools the more the connections"),
                sliderInput("num_S_Agents", "The number of Agents", 100, 3000, 1000),
                sliderInput("num_S_PreSch", "The number of Pre-Schools", 1, 40, 24),
                sliderInput("num_S_Pri", "The number of Primary Schools", 1, 20, 10),
                sliderInput("num_S_Sec", "The number of Secondary Schools", 1, 15, 5),
                sliderInput("num_S_Uni", "The number of Universities", 1, 7, 5),
-               sliderInput("num_S_Wrk", "The number of Work Places", 10, 50, 25),
                actionButton("School_Net", "Render School Net"),
                tabsetPanel(type = "tabs",
                            tabPanel("Combined Network", plotOutput("SchoolNet")),
@@ -410,6 +411,22 @@ ui = dashboardPage(
                            tabPanel("Primary School Network", plotOutput("PriSchoolNet")),
                            tabPanel("Secondary School Network", plotOutput("SecSchoolNet")),
                            tabPanel("University Network", plotOutput("UniSchoolNet"))
+               )
+      ),
+      tabPanel("School and Work",
+               h3("The school network overlayed on the work network"),
+               h4("The higher the workplaces the less work space interaction"),
+               sliderInput("num_SW_Agents", "The number of Agents", 100, 3000, 1000),
+               sliderInput("num_SW_PreSch", "The number of Pre-Schools", 1, 40, 24),
+               sliderInput("num_SW_Pri", "The number of Primary Schools", 1, 20, 10),
+               sliderInput("num_SW_Sec", "The number of Secondary Schools", 1, 15, 5),
+               sliderInput("num_SW_Uni", "The number of Universities", 1, 7, 5),
+               sliderInput("num_SW_Wrk", "The number of Work Places", 10, 50, 25),
+               actionButton("School_Work_Net", "Render School Net"),
+               tabsetPanel(type = "tabs",
+                           tabPanel("School Network", plotOutput("SchoolWRKNet")),
+                           tabPanel("Work Network", plotOutput("WorkWRKNet")),
+                           tabPanel("Combined", plotOutput("WorkSchoolNet"))
                )
       )
       
@@ -513,7 +530,7 @@ server = function(input, output) {
   ################
   
   schoolNetwork <- eventReactive(input$School_Net, {
-    makeTransNetwork(numAgents = input$num_S_Agents, householdsize = 2.5, numPreSchools = input$num_S_PreSch, numPriSchools = input$num_S_Pri, numSecSchools = input$num_S_Sec, numUniversities = input$num_S_Uni, numWorkplaces = input$num_S_Wrk)
+    makeTransNetwork(numAgents = input$num_S_Agents, householdsize = 2.5, numPreSchools = input$num_S_PreSch, numPriSchools = input$num_S_Pri, numSecSchools = input$num_S_Sec, numUniversities = input$num_S_Uni, numWorkplaces = 25)
   })
   
   output$SchoolNet <- renderPlot({
@@ -537,7 +554,34 @@ server = function(input, output) {
   output$SecSchoolNet <- renderNetworkPlot("secSchoolnet", "Secondary School Network", "blue")
   output$UniSchoolNet <- renderNetworkPlot("uniSchoolnet", "University Network", "red")
   
-    
+  ################
+  #
+  ## plot the School work network
+  #
+  ################
+  schoolWorkNetwork <- eventReactive(input$School_Work_Net, {
+    makeTransNetwork(numAgents = input$num_SW_Agents, householdsize = 2.5, numPreSchools = input$num_SW_PreSch, numPriSchools = input$num_SW_Pri, numSecSchools = input$num_SW_Sec, numUniversities = input$num_SW_Uni, numWorkplaces = input$num_SW_Wrk)
+  })
+  
+  output$School_Work_Net <- renderPlot({
+    net <- SchoolWorkNetwork()
+    if (!is.null(net) && !is.null(net$schoolnet)) {
+      mygplot(coord = net$xy, network = net$schoolnet, states = rep(1, nrow(net$schoolnet)), main = "Combined School Work Network", edgecol = "orange")
+    }
+  }, height = 900, width = 900)
+  
+  renderNetworkPlot <- function(network, title, color) {
+    renderPlot({
+      net <- schoolWorkNetwork()
+      if (!is.null(net) && !is.null(net[[network]])) {
+        mygplot(coord = net$xy, network = net[[network]], states = rep(1, nrow(net$xy)), main = title, edgecol = color)
+      }
+    }, height = 900, width = 900)
+  }
+  
+  output$SchoolWRKNet <- renderNetworkPlot("schoolnet", "School Network", "green")
+  output$WorkWRKNet <- renderNetworkPlot("worknet", "Work Place Network", "brown")
+  output$WorkSchoolNet <- renderNetworkPlot("network", "Combined School and Work Network", "orange")
   
   
 }
