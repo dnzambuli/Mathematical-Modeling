@@ -238,7 +238,7 @@ makeTransNetwork <- function(numAgents=1000,
                                    numSecSchools,  # Number of secondary schools
                                    numUniversities,  # Number of universities
                                    numWorkplaces=25,
-                                   agePyramid = c(20,8,10,12,14,13,12,11)) {
+                                   agePyramid = c(20,28,10,12,14,13,12,11)) {
   
   # Calculate the number of individuals in each education level based on agePyramid and other parameters
   numPreSchool <- round(agePyramid[1] / sum(agePyramid) * numAgents)  # Pre-school children
