@@ -248,10 +248,10 @@ makeTransNetwork <- function(numAgents=1000,
   
   
   # Determine age for each group
-  ages <- c(rep(3:5, numPreSchool, replace = TRUE),  # Pre-school age
-            rep(6:14, numPrimarySchool, replace = TRUE),  # Primary school age
-            rep(15:19, numSecondarySchool, replace = TRUE),  # Secondary school age
-            rep(20:24, numUniversity, replace = TRUE),  # University age
+  ages <- c(sample(3:5, numPreSchool, replace = TRUE),  # Pre-school age
+            sample(6:14, numPrimarySchool, replace = TRUE),  # Primary school age
+            sample(15:19, numSecondarySchool, replace = TRUE),  # Secondary school age
+            sample(20:24, numUniversity, replace = TRUE),  # University age
             sample(25:75, numAgents - numPreSchool - numPrimarySchool - numSecondarySchool - numUniversity, replace=TRUE))  # Adults
   
   numHouseholds <- floor(numAgents / householdsize)
@@ -283,7 +283,17 @@ makeTransNetwork <- function(numAgents=1000,
     pool[[i]] <- tmpAgent
   }
   
-  schoolmat <- (outer(school, school, "==") * outer(school, school, "*")) > 0
+  # Creating separate matrices for each type of school
+  preSchoolmat <- outer(school, school, "==") * (school <= numPreSchools & school > 0)
+  priSchoolmat <- outer(school, school, "==") * (school > numPreSchools & school <= numPreSchools + numPriSchools)
+  secSchoolmat <- outer(school, school, "==") * (school > numPreSchools + numPriSchools & school <= numPreSchools + numPriSchools + numSecSchools)
+  uniSchoolmat <- outer(school, school, "==") * (school > numPreSchools + numPriSchools + numSecSchools)
+  
+  # Combined school network
+  combinedSchoolmat <- preSchoolmat | priSchoolmat | secSchoolmat | uniSchoolmat
+  
+  
+  # schoolmat <- (outer(school, school, "==") * outer(school, school, "*")) > 0
   workmat <- (outer(work, work, "==") * outer(work, work, "*")) > 0
   housemat <- (outer(myHousehold, myHousehold, "==")) > 0
   agentXY <- householdXY[myHousehold, ] + matrix(.15 * rnorm(length(myHousehold) * 2), ncol=2)
@@ -294,7 +304,11 @@ makeTransNetwork <- function(numAgents=1000,
   return(list(xy=agentXY, pool=pool, network=network,
               neighborhood=neighborhood,
               worknet=workmat,
-              schoolnet=schoolmat,
+              schoolnet=combinedSchoolmat,
+              preSchoolnet=preSchoolmat, 
+              priSchoolnet=priSchoolmat, 
+              secSchoolnet=secSchoolmat, 
+              uniSchoolnet=uniSchoolmat,
               housenet = housemat))
 }
 
