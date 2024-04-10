@@ -232,13 +232,16 @@ makeDemographicNetwork <- function(numAgents=1000,
 #################################################################
 
 makeTransNetwork <- function(numAgents=1000, 
-                                   householdsize=2.5,
-                                   numPreSchools,  # Number of pre-schools
-                                   numPriSchools,  # Number of primary schools
-                                   numSecSchools,  # Number of secondary schools
-                                   numUniversities,  # Number of universities
-                                   numWorkplaces=25,
-                                   agePyramid = c(20,28,10,12,14,13,12,11)) {
+                             householdsize=2.5,
+                             numPreSchools,  # Number of pre-schools
+                             numPriSchools,  # Number of primary schools
+                             numSecSchools,  # Number of secondary schools
+                             numUniversities,  # Number of universities
+                             numWorkplaces=25,
+                             agePyramid = c(20,8,10,12,14,13,12,11)
+                             ) {
+  
+  schools = numPreSchools + numPriSchools + numSecSchools + numUniversities
   
   # Calculate the number of individuals in each education level based on agePyramid and other parameters
   numPreSchool <- round(agePyramid[1] / sum(agePyramid) * numAgents)  # Pre-school children
@@ -260,10 +263,10 @@ makeTransNetwork <- function(numAgents=1000,
   myHousehold <- sample(1:numHouseholds, size=numAgents, replace=T)
   
   # Assign individuals to schools and workplaces
-  school <- c(sample(1:numPreSchools, numPreSchool, replace=TRUE),
-              sample(numPreSchools+1:numPreSchools+numPriSchools, numPrimarySchool, replace=TRUE),
-              sample(numPreSchools+numPriSchools+1:numPreSchools+numPriSchools+numSecSchools, numSecondarySchool, replace=TRUE),
-              sample(numPreSchools+numPriSchools+numSecSchools+1:numPreSchools+numPriSchools+numSecSchools+numUniversities, numUniversity, replace=TRUE),
+  school <- c(sample(1:numPreSchool, numPreSchool, replace=TRUE),
+              sample(numPreSchool+1:numPreSchool+numPrimarySchool, numPrimarySchool, replace=TRUE),
+              sample(numPreSchool+numPrimarySchool+1:numPreSchool+numPrimarySchool+numSecondarySchool, numSecondarySchool, replace=TRUE),
+              sample(numPreSchool+numPrimarySchool+numSecondarySchool+1:numPreSchool+numPrimarySchool+numSecondarySchool+numUniversity, numUniversity, replace=TRUE),
               rep(0, numAgents - numPreSchool - numPrimarySchool - numSecondarySchool - numUniversity))  # Non-students have no school
   
   employed <- sample(1:numAgents, round(0.75 * (numAgents - numPreSchool - numPrimarySchool - numSecondarySchool - numUniversity)), replace=FALSE)
@@ -387,18 +390,14 @@ ui = dashboardPage(
       tabPanel("Households",
                h3("The distribution of households in the environment"),
                sliderInput("num_Agents", "The number of Agents", 100, 3000, 1000),
-               sliderInput("num_PreSch", "The number of Pre-Schools", 1, 40, 4),
-               sliderInput("num_Pri", "The number of Primary Schools", 1, 20, 10),
-               sliderInput("num_Sec", "The number of Secondary Schools", 1, 15, 5),
-               sliderInput("num_Uni", "The number of Universities", 1, 7, 5),
-               sliderInput("num_Wrk", "The number of Work Places", 10, 50, 25),
+               sliderInput("house_size", "The number of Pre-Schools", 1, 15, 2.5),
                actionButton("HousePlot", "Render Households"),
                plotOutput("householdPlot")
       ),
       tabPanel("School Network",
                h3("The distribution of schools in the environment"),
                sliderInput("num_S_Agents", "The number of Agents", 100, 3000, 1000),
-               sliderInput("num_S_PreSch", "The number of Pre-Schools", 1, 40, 4),
+               sliderInput("num_S_PreSch", "The number of Pre-Schools", 1, 40, 24),
                sliderInput("num_S_Pri", "The number of Primary Schools", 1, 20, 10),
                sliderInput("num_S_Sec", "The number of Secondary Schools", 1, 15, 5),
                sliderInput("num_S_Uni", "The number of Universities", 1, 7, 5),
@@ -496,7 +495,7 @@ server = function(input, output) {
   ################
 
   houseHolds <- eventReactive(input$HousePlot, {
-    makeTransNetwork(numAgents = input$num_Agents, householdsize = 2.5, numPreSchools = input$num_PreSch, numPriSchools = input$num_Pri, numSecSchools = input$num_Sec, numUniversities = input$num_Uni, numWorkplaces = input$num_Wrk)
+    makeTransNetwork(numAgents = input$num_Agents, householdsize = input$house_size, numPreSchools = 96, numPriSchools = 48, numSecSchools = 24, numUniversities = 96, numWorkplaces = 30)
   })
   
   output$householdPlot <- renderPlot({
