@@ -1,0 +1,854 @@
+---
+title: "Mid Term"
+author: "Nzambuli Daniel"
+date: "2024-02-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Given Information
+
+**Parameter list**
+
+-   Contact Rate (12)
+
+-   Transmission Probability (0.03)
+
+-   Infectiousness Period (12)
+
+-   Latency Period (21)
+
+```{r}
+Cont.Rate = 12
+Trans.Prob = 0.03
+Inf.Per = 12
+Lat.Per = 21
+```
+
+**Disease Dynamic Parameter and Initial Values**
+
+-   Exposed (15,000)
+
+-   Susceptible (20,989)
+
+-   Infected (11)
+
+-   Recovered (0)
+
+-   Dead (0)
+
+```{r}
+exposed = 15000
+susceptible = 20989
+infected = 11
+recovered = 0
+dead = 0
+```
+
+**State Values**
+
+-   Susceptible: susceptible/Total population
+
+-   Exposed: exposed/Total population
+
+-   Infected: infected/Total population
+
+-   Recovered: recovered/Total population
+
+-   Hospitalized: hospitalized/Total population
+
+-   Dead: dead/Total population
+
+```{r}
+N = susceptible + exposed + infected + dead + recovered
+susc = susceptible /N
+expsd = exposed/N
+infct = infected/N
+dead = dead/N
+recvd = recovered/N
+
+monitor.time = 100
+```
+
+# Task
+
+## 1.) Present the Schematic Framework illustrate the compartments and interactions between age-groups. Remember that susceptible children experience the force of infection, while susceptible adults become infected at a constant rate. For this case assume that:
+
+-   Children make 20 contacts per day on average, with 12 contacts being with other children.
+
+-   Adults make 19 contacts per day on average, with 15 contacts being with other adults.
+
+### Load Libraries
+
+```{r}
+library(deSolve)
+library(tidyverse)
+library(DiagrammeR)
+```
+
+```{r}
+grViz("digraph flowchart {
+      graph [layout = dot,
+       rankdir = LR]
+      node [fontname = Helvetica, shape = circle,]
+      tab1 [label = '@@1', fillcolor = '#41c542', style = filled]
+      tab2 [label = '@@2', fillcolor = '#8c9647', style = filled]
+      tab3 [label = '@@3', fillcolor = '#8d9647', style = filled] 
+      tab4 [label = '@@4', fillcolor = '#b17e4a', style = filled]
+      tab5 [label = '@@5', fillcolor = '#b27e4a', style = filled]
+      tab6 [label = '@@6', fillcolor = '#fc4f4f', style = filled]
+      tab7 [label = '@@7', fillcolor = '#fd4f4d', style = filled]
+      tab8 [label = '@@8', fillcolor = '#1cdd3f', style = filled]
+      tab9 [label = '@@9', fillcolor = '#1ddd3f', style = filled]
+      # edge definitions with the node IDs
+      tab1 -> tab2 [label = 'beta child'];
+      tab1 -> tab3 [label = 'beta adult'];
+      tab2 -> tab4 [label = 'kappa child'];
+      tab4 -> tab6 [label = 'mu child'];
+      tab4 -> tab8 [label = 'gamma child'];
+      tab3 -> tab5 [label = 'kappa adult'];
+      tab5 -> tab7 [label = 'mu adult'];
+      tab5 -> tab9 [label = 'gamma adult'];
+      }
+
+      [1]: 'Susceptible'
+      [2]: 'Exposed Children'
+      [3]: 'Exposed Adults'
+      [4]: 'Infected Children'
+      [5]: 'Infected Adult'
+      [6]: 'Dead Children'
+      [7]: 'Dead Adults'
+      [8]: 'Recovered Children'
+      [9]: 'Recovered Adults'
+      ")
+```
+
+### Illustrating the interactions between children and adults
+
+```{r}
+grViz("digraph flowchart {
+      graph [layout = dot,
+       rankdir = LR]
+      node [fontname = Helvetica, shape = circle,]
+      tab1 [label = '@@1', fillcolor = '#41c542', style = filled]
+      tab2 [label = '@@2', fillcolor = '#8c9647', style = filled]
+      
+      # edge definitions with the node IDs
+      tab1 -> tab2 [label = '8'];
+      tab1 -> tab1 [label = '12'];
+      tab2 -> tab1 [label = '4'];
+      tab2 -> tab2 [label = '15'];
+      }
+
+      [1]: 'child'
+      [2]: 'adult'
+      ")
+```
+
+```{r}
+c2a.Contact = 8
+c2c.Contact = 12
+a2a.Contact = 15
+a2c.Contact = 4
+```
+
+### Kappa Beta and Gamma
+
+> 1.  $\beta$ **Beta**
+>
+> **Transmission coefficient** – The average number of `infectious contacts` an infected infectious individual makes each time period. *High beta* means that the disease has `more opportunity` to spread.
+>
+> $$
+> \beta = contact\ rate∗transmission\ probability
+> $$
+>
+> 2.  $\sigma$ **Sigma** or $\delta$ **Delta**
+>
+> **Exposed individuals become infectious** – The reciprocal of the average time it takes to become infectious. Exposion rate.
+>
+> $$
+> \sigma = \frac{1}{latency\ period}
+> $$
+>
+> 3.  $\gamma$ **Gamma**
+>
+> **Rate of Recovery** – the reciprocal of the average time it takes to recover.
+>
+> $$
+> \gamma = \frac {1}{infectious\ period}
+> $$
+>
+> 4.  $\mu$ **Mu**
+>
+> **Mortality rate** – mortality rate of infectious individuals.
+>
+> the higher the $\mu$ the more deadly the disease is
+>
+> **Reproduction Number**
+>
+> $$
+> Reproduction\ number = \frac{\beta}{\gamma}
+> $$
+
+```{r}
+beta = Cont.Rate * Trans.Prob
+sigma = 1/Lat.Per
+gamma = 1/Inf.Per
+mu = 1/Inf.Per
+```
+
+### Assumptions on the population
+
+> **Children are 30%** of the population
+>
+> -   because children experience the weight of infection the adults are considered to be all the infected individuals.
+
+```{r}
+S.child = 0.3 * (susc)
+S.adult = 0.7 * (susc)
+I.child = 0
+I.adult = infct
+E.child = 0.3 * expsd
+E.adult = 0.7 * expsd
+R.child = 0
+R.adult = 0
+D.child = 0
+D.adult = 0
+N = S.child + S.adult + I.child + I.adult + E.child + E.adult + R.child + R.adult + D.child + D.adult # population expressed as a proportion should equal 1
+N
+```
+
+> **Proportional Parameters**
+>
+> -   Children have been considered as 30% of the population
+>
+> -   N expresses the population as a parameter expressed as a sum of all the people in who are susceptible, infected, exposed, recovered and dead.
+>
+> -   At any point N remains constant
+
+## 2.) Simulate the SEIR Epidemic based on the provided parameters and initial values.
+
+**Differential Equations**
+
+-   susceptible individuals
+
+$$
+weight\ of\ infection\ \lambda = \beta * (Child-to-Child * \frac{infected\ children}{no.\ children} + Child-to-Adult * \frac{infected\ adult}{no.\ adult}\\
+\frac{dS_{children}}{dt} = -\lambda * S_{children}\\
+infected\ adult\ \beta.a  = (\beta * \frac{infected\ adult}{no.\ Adult}) *(Adult-to-Adult + Adult-to-Child)\\
+\frac{dS_{adult}}{dt} = -\beta * S_{adult}
+$$
+
+-   Exposed individuals
+
+$$
+\frac{dE_{children}}{dt} = \lambda * S_{children} - \sigma * E_{children}\\
+\frac{dE_{adult}}{dt} = \beta * S_{adult} - \sigma * E_{adult}
+$$
+
+-   Infected individuals
+
+$$
+\frac{dI_{children}}{dt} = \sigma * E_{children} - (\gamma + \mu) I_{children}\\
+\frac{dI_{adult}}{dt} = \sigma * E_{adult} - (\gamma + \mu) I_{adult}
+$$
+
+-   recovered individuals
+
+$$
+\frac{dR_{children}}{dt} = \gamma * I_{children}\\
+\frac{dR_{adult}}{dt} = \gamma * I_{adult}
+$$
+
+-   dead individuals
+
+$$
+\frac{dR_{children}}{dt} = \mu * I_{children}\\
+\frac{dR_{adult}}{dt} = \mu * I_{adult}
+$$
+
+### a.) Define the SEIR model equations incorporating age-group-specific contact rates.
+
+```{r}
+seir.d = function(time, state, parameters){
+  S.c = state[1]
+  S.a = state[2]
+  E.c = state[3]
+  E.a = state[4]
+  I.c = state[5]
+  I.a = state[6]
+  R.c = state[7]
+  R.a = state[8]
+  D.c = state[9]
+  D.a = state[10]
+  with(as.list(parameters), {
+    N.c = S.c + E.c + I.c + R.c + D.c
+    N.a = S.a + E.a + I.a + R.a + D.a
+    
+    # weight of infection
+    lambda = (beta * c2c * I.c/N.c) + (beta * c2a * I.a/N.a)
+    
+    # adults have a constant infection rate
+    beta.a = (a2a * beta * I.a/N.c) +  (a2c * beta * I.a/N.a)
+    
+    # define the differential equations
+    
+    # child differential equations
+    dSc = - lambda * S.c
+    dEc = lambda * S.c - sigma * E.c
+    dIc = sigma * E.c - (gamma + mu) * I.c
+    dRc = gamma * I.c
+    dDc = mu * I.c
+    
+    # adult differential equations
+    dSa = - beta.a * S.a
+    dEa = beta.a * S.a - sigma * E.a
+    dIa = sigma * E.a - (gamma + mu) * I.a
+    dRa = gamma * I.a
+    dDa = mu * I.a
+    
+    # return the output of the differential equations
+    return(list(c(dSc, dSa, dEc, dEa, dIc, dIa, dRc, dRa, dDc, dDa)))
+    
+  })
+}
+```
+
+### b.) Utilize the provided initial values to simulate the epidemic over a 100-day period.
+
+```{r}
+parameters = c(b = beta, mu = mu, sigma = sigma, gamma = gamma, c2c = c2c.Contact, c2a = c2a.Contact, a2a = a2a.Contact, a2c = a2c.Contact)
+state = c(S.child = S.child, S.adult = S.adult,
+          E.child = E.child, E.adult = E.adult,
+          I.child = I.child, I.adult = I.adult,
+          R.child = R.child, R.adult = R.adult,
+          D.child = D.child, D.adult = D.adult)
+time = seq(0, 100, 1)
+```
+
+#### Simulate the model
+
+```{r}
+no_Hosp = as.data.frame(ode(y = state, times = time, func = seir.d, parms = parameters))
+head(no_Hosp)
+```
+
+#### Plot the model
+
+```{r}
+long_no_hosp <- no_Hosp %>%  pivot_longer(cols = c("S.child", "S.adult", "E.child", "E.adult", "I.child", "I.adult","R.child", "R.adult", "D.child", "D.adult"),
+                        names_to = "state",
+                        values_to = "value")
+head(long_no_hosp)
+```
+
+```{r}
+# The plot
+ggplot(data = long_no_hosp,                                               
+       aes(x = time, y = value, colour = state, group = state)) +  
+  geom_line() +                                                          
+  xlab("Time (days)")+                                                   
+  ylab("Number of people") +                                
+  labs(colour = "Compartment") 
+```
+
+#### split the data
+
+```{r}
+create_child_plot = function(data){
+  child_data = data[, c("time","S.child", "E.child", "I.child", "R.child", "D.child")]
+  child_long <- child_data %>%  pivot_longer(cols = c(S.child, E.child, I.child, R.child, D.child),
+                        names_to = "state",
+                        values_to = "value")
+  plot = ggplot(data = child_long,
+                aes(x = time, y = value, colour = state, group = state)) +
+    geom_line() +
+    xlab("Time (days)")+
+    ylab("Number of people") +
+    labs(colour = "Compartment") 
+  print(plot)
+}
+```
+
+```{r}
+create_adult_plot = function(data){
+  adult_data = data[, c("time","S.adult", "E.adult", "I.adult", "R.adult", "D.adult")]
+  adult_long <- adult_data %>%  pivot_longer(cols = c(S.adult, E.adult, I.adult, R.adult, D.adult),
+                        names_to = "state",
+                        values_to = "value")
+  plot = ggplot(data = adult_long,
+                aes(x = time, y = value, colour = state, group = state)) +
+    geom_line() +
+    xlab("Time (days)")+
+    ylab("Number of people") +
+    labs(colour = "Compartment") 
+  print(plot)
+}
+```
+
+> -   all the infected individuals are adults with the children only getting infected because of the infection weight across the population.
+>
+> -   Because there is no hospitalization mu is calculated based on all the infected individuals.
+
+```{r}
+create_child_plot(no_Hosp)
+```
+
+```{r}
+create_adult_plot(no_Hosp)
+```
+
+> -   because of the lack of hospitalization data, The graphs look similar as $\mu = \gamma$.
+>
+> -   The population seems to acquire hard immunity against the disease on day `25` and by day `100` there seems to be no transition from the state the people have ended up on.
+>
+>     -   This means susceptible individuals remain susceptible
+>
+>     -   Exposed individuals near 0
+>
+>     -   Infected individuals near 0
+>
+>     -   and recovered individuals settle at half the population
+>
+> -   Because of the lack of hospitalization the proportion of dead people is expressed as $\mu * infected$ this returns a very small number when viewed as a proportion and tends to remain around the 0 line without much take off.
+
+### c.) Incorporate hospitalization. take into consideration two scenarios unlimited and limited bed capacity
+
+### d.) For hospitalized individuals, specify a mortality rate due to critical illness.
+
+### e.) Plot the trajectories of Susceptible, Exposed, Infected, Recovered, Hospitalized, and Dead sub-populations over time.
+
+> **Hospitalization**
+>
+> 1.  Unlimited hospital beds
+>
+> -   $\mu_n$ hospitalized without being in critical condition `95%`
+>
+> -   $\mu_h$ hospitalized and in critical condition `5%`
+>
+> -   $i_h$ total number of hospital beds = N
+>
+> The whole population can be hospitalized at any given time
+>
+> 2.  Limited hospital bed
+>
+> -   $i_h$ can be reduced to bellow 100 % of the population
+>
+> -   $\mu_h + \mu_n = i_h$
+>
+> For **limited hospitals** the program uses the standard world health organization (WHO) number of hospitals
+>
+> -   **Low level economy** – `2.5` hospitals for every 1000 people
+>
+> -   **Medium level economy** – `3.5` hospitals for every 1000 people
+>
+> -   **High level economy** – `5` hospitals for every 1000 people
+
+#### The differential equations
+
+adding hospitalization means recovered individuals can be expressed as
+
+$$
+\frac{dR}{dt} = \gamma *I_{child/adult} + \mu * I_{child/adult} * hospitalized\ individuals\ NOT\ in\ critical\ condition
+$$
+
+the dead people can be expressed as
+
+$$
+\frac{dD}{dt} = \mu * I_{child/adult} * (1-hospitalized\ individuals\ NOT\ in\ critical\ condition)
+$$
+
+**Hospitalization data**
+
+```{r}
+unlim_hosp = 1000/1000 * N
+low_econ = 2.5/1000 * N
+med_econ = 3.5/1000 * N
+high_econ = 5/1000 * N
+utopia_econ = 1/2 * N
+ih = c(unlim_hosp, low_econ, med_econ, high_econ, utopia_econ)
+muh = ih * 0.05
+mun = ih * 0.95
+```
+
+```{r}
+seird.with.hosp = function(time, state, parameters){
+  S.c = state[1]
+  S.a = state[2]
+  E.c = state[3]
+  E.a = state[4]
+  I.c = state[5]
+  I.a = state[6]
+  R.c = state[7]
+  R.a = state[8]
+  D.c = state[9]
+  D.a = state[10]
+  with(as.list(parameters), {
+    N.c = S.c + E.c + I.c + R.c + D.c
+    N.a = S.a + E.a + I.a + R.a + D.a
+    
+    # weight of infection
+    lambda = (beta * c2c * I.c/N.c) + (beta * c2a * I.a/N.a)
+    
+    # adults have a constant infection rate
+    beta.a = (a2a * beta * I.a/N.c) +  (a2c * beta * I.a/N.a)
+    
+    # define the differential equations
+    
+    # child differential equations
+    dSc = - lambda * S.c
+    dEc = lambda * S.c - sigma * E.c
+    dIc = sigma * E.c - (gamma + mu) *I.c
+    dRc = gamma * I.c + (mu* I.c * mun)
+    dDc = mu * I.c * (1-mun)
+    
+    # adult differential equations
+    dSa = - beta.a * S.a
+    dEa = beta.a * S.a - sigma * E.a
+    dIa = sigma * E.a - (gamma + mu) * I.a
+    dRa = gamma * I.a + (mu* I.a* mun)
+    dDa = mu * I.a * (1-mun)
+    
+    # return the output of the differential equations
+    return(list(c(dSc, dSa, dEc, dEa, dIc, dIa, dRc, dRa, dDc, dDa)))
+    
+  })
+}
+```
+
+#### Fitting the model
+
+```{r}
+hosp_data = c() # stores the data on each number of hospitals
+for(i in 1:length(muh)){
+  parameters = c(b = beta, mu = mu, sigma = sigma, gamma = gamma, c2c = c2c.Contact, c2a = c2a.Contact, a2a = a2a.Contact, a2c = a2c.Contact, mun = mun[i])
+  state = c(S.child = S.child, S.adult = S.adult,
+          E.child = E.child, E.adult = E.adult,
+          I.child = I.child, I.adult = I.adult,
+          R.child = R.child, R.adult = R.adult,
+          D.child = D.child, D.adult = D.adult)
+  time = seq(0, 100, 1)
+  hosp_data[[i]] = as.data.frame(ode(y = state, times = time, func = seird.with.hosp, parms = parameters))
+
+}
+length(hosp_data)
+```
+
+#### Plotting the data
+
+```{r}
+unlimited_hospitals = data.frame(hosp_data[1])
+low_economy = data.frame(hosp_data[2])
+med_economy = data.frame(hosp_data[3])
+high_economy = data.frame(hosp_data[4])
+utopia = data.frame(hosp_data[5])
+```
+
+#### Unlimited hospitals
+
+```{r}
+create_child_plot(unlimited_hospitals)
+```
+
+```{r}
+create_adult_plot(unlimited_hospitals)
+```
+
+> because of unlimited hospitals death rate remains relatively low for both populations.
+>
+> The susceptible adults drop at a steeper rate as compared to the susceptible children. This is caused by the steeper rise in adult infected before the population of adults finally interacts with the children population.
+>
+> There is a significantly high recovery rate
+>
+> The population of adults seems to acquire hard immunity against the disease on day `10` while the child population acquires it two days later.
+>
+> from the graphs the population stabilizes on day `75` with individuals who die remaining constant rate after day 85 for adults
+
+#### Low Economy Region
+
+```{r}
+create_child_plot(low_economy)
+```
+
+```{r}
+create_adult_plot(low_economy)
+```
+
+> **Low income Economies**
+>
+> -   the population that recovers matches the population that dies.
+>
+> -   children reach peak infection on day 13 and adults reach peak infection a few days earlier
+>
+> -   This model gives children infection as the higher peak infection at 25% of all the child population
+>
+> -   adult peak infection for this model is `21.67%` of the population
+
+#### Medium Economy Region
+
+```{r}
+create_child_plot(med_economy)
+create_adult_plot(med_economy)
+```
+
+> **Medium Economies**
+>
+> -   have a significantly lower death rate that can be attributed to the presence of one more hospital per 1000 people
+>
+> -   Investing in an increased hospital facilities seems to lower the number of deaths in the population
+
+#### High Ecomony
+
+```{r}
+create_adult_plot(high_economy)
+create_child_plot(high_economy)
+```
+
+> **High economy**
+>
+> -   The initial separation between dead and recovered individuals is seen at this level.
+>
+> -   The disease has a high death rate of `0.08` of all the individuals who end up in the ICU. This means that for every 100 individuals that end up in the ICU `8` will die because of the disease
+
+#### Utopia
+
+an utopia was made with a 50% of all the individuals who are hospitalized being able to be hospitalized.
+
+This was done to investigate the effect of increasing the number of hospitals
+
+```{r}
+create_adult_plot(utopia)
+create_child_plot(utopia)
+```
+
+The death rate is observed to be significantly lower backing up the hypothesized trend that more hospitals actually lower the death rate of individuals because of the disease
+
+## 3.) Evaluate and Discuss Changes with Vaccination assuming a vaccine with 100% effectiveness against acquiring infections and analyze its impact on sub-populations.
+
+#### a.) Introduce vaccination into the model, varying vaccination percentages (10%, 20%, 30%, 50%).
+
+#### b.) Simulate and observe changes in the trajectories of Susceptible, Exposed, Infected, Recovered, Hospitalized, and Dead sub-populations.
+
+#### c.) Discuss how different vaccination rates influence the epidemic dynamics, hospitalization rates, and mortality rates
+
+> **If a vaccine is 100% effective**
+>
+> -   The population or recovered individuals begins from a number larger than 0 because the vaccine ensure that individuals have been exposed to a denatured example of the disease and recovered never to be reinfected again at the start of the models
+>
+> -   This also reduces the susceptible individuals in the population. This is because once a person has been vaccinated the disease no longer affects them
+>
+> **Parameters are Expressed as:**
+>
+> $$
+> vaccinated = vaccinated\ percentage * population\\
+> vaccinated\ children = child\ proportion * vaccinated\\
+> susceptible\ child = sucscept\ child - vaccinated\ children\\
+> recovered\ child = recover\ child + vaccinated\ children
+> $$
+>
+> This is the same for the adults
+
+```{r}
+vaccination = c()
+pop_vac = c(0.1, 0.2, 0.3, 0.5)
+```
+
+#### Model Parameters
+
+The model assumes no hospitalization ratio between critical condition and just the regular outpatient care.
+
+The model just takes that 5% of the infected individuals die.
+
+```{r}
+seir.vac = function(time, state, parameters){
+  S.c = state[1]
+  S.a = state[2]
+  E.c = state[3]
+  E.a = state[4]
+  I.c = state[5]
+  I.a = state[6]
+  R.c = state[7]
+  R.a = state[8]
+  D.c = state[9]
+  D.a = state[10]
+  with(as.list(parameters), {
+    N.c = S.c + E.c + I.c + R.c + D.c
+    N.a = S.a + E.a + I.a + R.a + D.a
+    
+    # weight of infection
+    lambda = (beta * c2c * I.c/N.c) + (beta * c2a * I.a/N.a)
+    
+    # adults have a constant infection rate
+    beta.a = (a2a * beta * I.a/N.c) +  (a2c * beta * I.a/N.a)
+    
+    # define the differential equations
+    
+    # child differential equations
+    dSc = - lambda * S.c
+    dEc = lambda * S.c - sigma * E.c
+    dIc = sigma * E.c - (gamma + mu) *I.c
+    dRc = gamma * I.c 
+    dDc = mu * I.c * 0.05
+    
+    # adult differential equations
+    dSa = - beta.a * S.a
+    dEa = beta.a * S.a - sigma * E.a
+    dIa = sigma * E.a - (gamma + mu) * I.a
+    dRa = gamma * I.a
+    dDa = mu * I.a * 0.05
+    
+    # return the output of the differential equations
+    return(list(c(dSc, dSa, dEc, dEa, dIc, dIa, dRc, dRa, dDc, dDa)))
+  })
+}
+```
+
+#### Population Parameters
+
+```{r}
+for (i in 1:length(pop_vac)){
+  vacnD = pop_vac[i] * N
+  child.vacnD = 0.3 * vacnD
+  vS.child = 0.3 * susc - child.vacnD
+  vE.child = E.child
+  vI.child = I.child
+  vR.child = 0.3 * recvd + child.vacnD
+  vD.child = D.child
+  
+  # the adult parameters
+  adult.vacnD = 0.7 * vacnD
+  vS.adult = 0.7 * susc - adult.vacnD
+  vE.adult = E.adult
+  vI.adult = I.adult
+  vR.adult = 0.7 * recvd + adult.vacnD
+  vD.adult = D.adult
+  
+  # models
+  parameters = c(b = beta, mu = mu, sigma = sigma, gamma = gamma, c2c = c2c.Contact, c2a = c2a.Contact, a2a = a2a.Contact, a2c = a2c.Contact)
+  state = c(S.child = vS.child, S.adult = vS.adult,
+          E.child = vE.child, E.adult = vE.adult,
+          I.child = vI.child, I.adult = vI.adult,
+          R.child = vR.child, R.adult = vR.adult,
+          D.child = vD.child, D.adult = vD.adult)
+  time = seq(0, 100, 1)
+  vaccination[[i]] = as.data.frame(ode(y = state, times = time, func = seir.vac, parms = parameters))
+
+}
+length(vaccination)
+```
+
+#### Plot the data
+
+```{r}
+ten_perc = data.frame(vaccination[1])
+twenty_perc = data.frame(vaccination[2])
+thirty_perc = data.frame(vaccination[3])
+fifty_perc = data.frame(vaccination[4])
+```
+
+#### a. 10% Vaccination
+
+```{r}
+create_child_plot(ten_perc)
+create_adult_plot(ten_perc)
+```
+
+> **Interpretation**
+>
+> -   because of vaccination the intersection between susceptible adults and children happens with a larger population number.
+>
+> -   This means that the individual recovery is higher in each group because of the vaccination
+>
+> -   The death rate is also significantly lower compared to the original no hospital data.
+>
+> -   There is also a lower peak on the number of infected children and adults indicating the vaccine improves the surviveability from the disease.
+>
+> -   Because of the steeper recovery graph as compared to the original no hospital data, the model illustrates that vaccination increases the opportunity to recover from the disease
+
+#### b. 20% Vaccination
+
+```{r}
+create_child_plot(twenty_perc)
+create_adult_plot(twenty_perc)
+```
+
+> **Interpretation**
+>
+> excluding the shorter y-axis
+>
+> -   The model indicates a lower death rate than the 10% vaccination.
+>
+> -   There also seems to be no overlap of susceptible and exposed individuals after 20% vaccination.
+>
+> -   This means once people are exposed they do not interact with the susceptible individuals. Because of this there is only a reduction in people ravaged by the disease
+>
+> -   The lower peak of the infected graph also reflects this sentiment.
+>
+> -   Increased number of vaccinated individuals in the population lowers the impact of the disease on the population
+>
+> hard immunity in this case is achieved on `day 25`
+
+#### c. 30% Vaccination
+
+```{r}
+create_child_plot(thirty_perc)
+create_adult_plot(thirty_perc)
+```
+
+> **Interpretation**
+>
+> The first notable improvement is that the hard immunity is achieved 12 days before the hard immunity for the `20%` vaccinated population.
+>
+> -   The trend of no overlap between the susceptible and exposed individuals is also observed.
+>
+> -   This means that the part of the population that is exposed can only recover and/or die. However, they can not infect any more of the population
+>
+> -   There are continually lower peaks of the infected population indicating a reduce impact of the disease. The infection seems to only be isolated to the initial infected individuals and their immediate contacts
+
+#### d. 50% Vaccination
+
+```{r}
+create_child_plot(fifty_perc)
+create_adult_plot(fifty_perc)
+```
+
+> **Interpretation**
+>
+> at 50% vaccination we observe the exposed individuals being higher than the susceptible individuals for the first time.
+>
+> There is also the most steep decline in exposed individuals because of this
+>
+> And, the death-rate becomes asymptotic to 0 but not rising away from 0
+>
+> -   The exposed adult and child count matches the original population parameters before modeling the disease evolution
+>
+>     -   29.2 % of adults
+>
+>     -   12.5 % of children
+>
+> -   this value reduces after it reaches this exact figures indicating no new exposure to the disease
+>
+> -   the infected adult and child population rises slightly accommodating the initial exposed adults and children after which it drops immediately.
+>
+> -   The population at 50% vaccination seems to only be able to recover and the unfortunate few die
+>
+> From the first day of simulation the population seems to have already acquired hard endemic immunity against the disease. Only the **initially** exposed and infected individuals seem to experience the effects of the disease.
+
+## Conclusion
+
+-   increasing hospitalization by 10% the WHO recommended value for high income economies halves the effect of the epidemic on the mortality of population
+
+-   a 50% population vaccination proportion ensures completely no ability for the disease to spread past the infected and exposed part of the population
+
+-   A balance of these two factors based on cost of implementation can help lower the effects of a similar epidemic completely
+
+# References
+
+-   [WHO](Hospital beds ratio (who.int)
+
+-   [Modelling an Epidemic](How to Model an Epidemic with R (freecodecamp.org)
+
+-   [World Bank](https://www.bing.com/ck/a?!&&p=04ef4021923d34a3JmltdHM9MTcwODU2MDAwMCZpZ3VpZD0yMzM0ZDJkYS0zMGM3LTY3YmQtMWU3OS1jMTAwMzE0NTY2YTQmaW5zaWQ9NTIwNA&ptn=3&ver=2&hsh=3&fclid=2334d2da-30c7-67bd-1e79-c100314566a4&psq=hospital+bed+to+population+ratio&u=a1aHR0cHM6Ly9kYXRhLndvcmxkYmFuay5vcmcvaW5kaWNhdG9yL1NILk1FRC5CRURTLlpT&ntb=1)

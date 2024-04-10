@@ -1,0 +1,12 @@
+name: DemographicModel
+title: DemographicModel
+username: dnzambuli
+account: dnzambuli
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11719749
+bundleId: 8476811
+url: https://dnzambuli.shinyapps.io/DemographicModel/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

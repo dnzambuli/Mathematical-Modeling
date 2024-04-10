@@ -31,7 +31,6 @@ The transitions between these compartments are governed by a set of differential
 knitr::include_graphics("Picture2.png")
 ```
 
-<<<<<<< HEAD
 > $\mu_n$ and $\mu_h$ should equal the total unlimited hospital capacity
 >
 > -   $\mu_h$ hospitalized in ICU
@@ -78,8 +77,6 @@ knitr::include_graphics("Picture2.png")
 >
 > **Time** remains constant
 
-=======
->>>>>>> 721337f (started group work)
 ## Initial setting
 
 ```{r, }
@@ -145,12 +142,6 @@ ggplot(data = output_long,
   ylab("Number of people") +                                
   labs(colour = "Compartment") 
 ```
-
-<<<<<<< HEAD
-Finally we plot the dynamics of Susceptible, Exposed, Infectious and Recovered sub-populations in the same plot.
-=======
-Finally we plot the dynamics of Susceptibles, Exposed, Infectious and Recovered sub-populations in the same plot.
->>>>>>> 721337f (started group work)
 
 ```{r}
 
