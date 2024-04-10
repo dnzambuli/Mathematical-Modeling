@@ -396,7 +396,7 @@ ui = dashboardPage(
                plotOutput("householdPlot")
       ),
       tabPanel("School Network",
-               h3("The distribution of households in the environment"),
+               h3("The distribution of schools in the environment"),
                sliderInput("num_S_Agents", "The number of Agents", 100, 3000, 1000),
                sliderInput("num_S_PreSch", "The number of Pre-Schools", 1, 40, 4),
                sliderInput("num_S_Pri", "The number of Primary Schools", 1, 20, 10),
@@ -404,7 +404,13 @@ ui = dashboardPage(
                sliderInput("num_S_Uni", "The number of Universities", 1, 7, 5),
                sliderInput("num_S_Wrk", "The number of Work Places", 10, 50, 25),
                actionButton("School_Net", "Render School Net"),
-               plotOutput("SchoolNet")
+               tabsetPanel(type = "tabs",
+                           tabPanel("Combined Network", plotOutput("SchoolNet")),
+                           tabPanel("Pre-School Network", plotOutput("PreSchoolNet")),
+                           tabPanel("Primary School Network", plotOutput("PriSchoolNet")),
+                           tabPanel("Secondary School Network", plotOutput("SecSchoolNet")),
+                           tabPanel("University Network", plotOutput("UniSchoolNet"))
+               )
       )
       
     )
@@ -507,15 +513,30 @@ server = function(input, output) {
   ################
   
   schoolNetwork <- eventReactive(input$School_Net, {
-    makeTransNetwork(numAgents = input$num_Agents, householdsize = 2.5, numPreSchools = input$num_PreSch, numPriSchools = input$num_Pri, numSecSchools = input$num_Sec, numUniversities = input$num_Uni, numWorkplaces = input$num_Wrk)
+    makeTransNetwork(numAgents = input$num_S_Agents, householdsize = 2.5, numPreSchools = input$num_S_PreSch, numPriSchools = input$num_S_Pri, numSecSchools = input$num_S_Sec, numUniversities = input$num_S_Uni, numWorkplaces = input$num_S_Wrk)
   })
   
   output$SchoolNet <- renderPlot({
     net <- schoolNetwork()
     if (!is.null(net) && !is.null(net$schoolnet)) {
-      mygplot(coord = net$xy, network = net$schoolnet, states = rep(1, nrow(net$schoolnet)), main = "School Network", edgecol = "orange")
+      mygplot(coord = net$xy, network = net$schoolnet, states = rep(1, nrow(net$schoolnet)), main = "Combined School Network", edgecol = "orange")
     }
   }, height = 900, width = 900)
+  
+  renderNetworkPlot <- function(network, title) {
+    renderPlot({
+      net <- schoolNetwork()
+      if (!is.null(net) && !is.null(net[[network]])) {
+        mygplot(coord = net$xy, network = net[[network]], states = rep(1, nrow(net$xy)), main = title, edgecol = "orange")
+      }
+    }, height = 900, width = 900)
+  }
+  
+  output$PreSchoolNet <- renderNetworkPlot("preSchoolnet", "Pre-School Network")
+  output$PriSchoolNet <- renderNetworkPlot("priSchoolnet", "Primary School Network")
+  output$SecSchoolNet <- renderNetworkPlot("secSchoolnet", "Secondary School Network")
+  output$UniSchoolNet <- renderNetworkPlot("uniSchoolnet", "University Network")
+  
     
   
   
