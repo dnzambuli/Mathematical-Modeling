@@ -532,9 +532,9 @@ server = function(input, output) {
     }, height = 900, width = 900)
   }
   
-  output$PreSchoolNet <- renderNetworkPlot("preSchoolnet", "Pre-School Network", "orange")
-  output$PriSchoolNet <- renderNetworkPlot("priSchoolnet", "Primary School Network", "lightgreen")
-  output$SecSchoolNet <- renderNetworkPlot("secSchoolnet", "Secondary School Network", "purple")
+  output$PreSchoolNet <- renderNetworkPlot("preSchoolnet", "Pre-School Network", "green")
+  output$PriSchoolNet <- renderNetworkPlot("priSchoolnet", "Primary School Network", "darkgreen")
+  output$SecSchoolNet <- renderNetworkPlot("secSchoolnet", "Secondary School Network", "blue")
   output$UniSchoolNet <- renderNetworkPlot("uniSchoolnet", "University Network", "red")
   
     
