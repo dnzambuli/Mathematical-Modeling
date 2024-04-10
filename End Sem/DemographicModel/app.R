@@ -264,9 +264,9 @@ makeTransNetwork <- function(numAgents=1000,
   
   # Assign individuals to schools and workplaces
   school <- c(sample(1:numPreSchool, numPreSchool, replace=TRUE),
-              sample(numPreSchool+1:numPreSchool+numPrimarySchool, numPrimarySchool, replace=TRUE),
-              sample(numPreSchool+numPrimarySchool+1:numPreSchool+numPrimarySchool+numSecondarySchool, numSecondarySchool, replace=TRUE),
-              sample(numPreSchool+numPrimarySchool+numSecondarySchool+1:numPreSchool+numPrimarySchool+numSecondarySchool+numUniversity, numUniversity, replace=TRUE),
+              sample(1:numPrimarySchool, numPrimarySchool, replace=TRUE) + numPreSchool,
+              sample(1:numSecondarySchool, numSecondarySchool, replace=TRUE) + numPreSchool+numPrimarySchool,
+              sample(1:numUniversity, numUniversity, replace=TRUE) + numPreSchool+numPrimarySchool+numSecondarySchool,
               rep(0, numAgents - numPreSchool - numPrimarySchool - numSecondarySchool - numUniversity))  # Non-students have no school
   
   employed <- sample(1:numAgents, round(0.75 * (numAgents - numPreSchool - numPrimarySchool - numSecondarySchool - numUniversity)), replace=FALSE)
@@ -396,6 +396,7 @@ ui = dashboardPage(
       ),
       tabPanel("School Network",
                h3("The distribution of schools in the environment"),
+               h5("Things to note"),
                sliderInput("num_S_Agents", "The number of Agents", 100, 3000, 1000),
                sliderInput("num_S_PreSch", "The number of Pre-Schools", 1, 40, 24),
                sliderInput("num_S_Pri", "The number of Primary Schools", 1, 20, 10),
